@@ -1,0 +1,602 @@
+[
+  {
+    "lead_id": "LEAD-0001",
+    "category": "high_value",
+    "confidence": 0.85,
+    "description": "Enterprise SaaS lead, 600 employees, requested demo and pricing. Clear buying intent.",
+    "expected_action": "qualify",
+    "expected_outcome": "correct"
+  },
+  {
+    "lead_id": "LEAD-0002",
+    "category": "high_value",
+    "confidence": 0.79,
+    "description": "CTO-level contact from fintech company, tripled headcount in 12 months, asked about API integration.",
+    "expected_action": "qualify",
+    "expected_outcome": "correct"
+  },
+  {
+    "lead_id": "LEAD-0003",
+    "category": "high_value",
+    "confidence": 0.88,
+    "description": "Inbound from VP Sales, enterprise account, annual revenue \u20ac2M+, ready to start pilot.",
+    "expected_action": "qualify",
+    "expected_outcome": "correct"
+  },
+  {
+    "lead_id": "LEAD-0004",
+    "category": "high_value",
+    "confidence": 0.91,
+    "description": "Repeat customer from partner channel, previously closed deal, looking to expand seats.",
+    "expected_action": "qualify",
+    "expected_outcome": "correct"
+  },
+  {
+    "lead_id": "LEAD-0005",
+    "category": "high_value",
+    "confidence": 0.76,
+    "description": "Mid-market operations company, submitted RFP, timeline of 60 days, budget confirmed.",
+    "expected_action": "qualify",
+    "expected_outcome": "correct"
+  },
+  {
+    "lead_id": "LEAD-0006",
+    "category": "low_value",
+    "confidence": 0.22,
+    "description": "Individual freelancer, no company, no budget mentioned, vague interest only.",
+    "expected_action": "disqualify",
+    "expected_outcome": "correct"
+  },
+  {
+    "lead_id": "LEAD-0007",
+    "category": "low_value",
+    "confidence": 0.18,
+    "description": "Student email domain, mentions project research, no commercial intent.",
+    "expected_action": "disqualify",
+    "expected_outcome": "correct"
+  },
+  {
+    "lead_id": "LEAD-0008",
+    "category": "low_value",
+    "confidence": 0.29,
+    "description": "Small hobby business, single owner, monthly revenue under \u20ac2k.",
+    "expected_action": "disqualify",
+    "expected_outcome": "correct"
+  },
+  {
+    "lead_id": "LEAD-0009",
+    "category": "low_value",
+    "confidence": 0.15,
+    "description": "Spam-like submission with incomplete fields and non-business email.",
+    "expected_action": "disqualify",
+    "expected_outcome": "correct"
+  },
+  {
+    "lead_id": "LEAD-0010",
+    "category": "low_value",
+    "confidence": 0.31,
+    "description": "Lead from a company that dissolved 6 months ago per public records.",
+    "expected_action": "disqualify",
+    "expected_outcome": "correct"
+  },
+  {
+    "lead_id": "LEAD-0011",
+    "category": "support_escalation",
+    "confidence": 0.7,
+    "description": "Customer submitted 3 support tickets in 5 days, no resolution provided, threatening cancellation.",
+    "expected_action": "escalate",
+    "expected_outcome": "correct"
+  },
+  {
+    "lead_id": "LEAD-0012",
+    "category": "support_escalation",
+    "confidence": 0.8,
+    "description": "Enterprise client reports critical integration failure affecting production environment.",
+    "expected_action": "escalate",
+    "expected_outcome": "correct"
+  },
+  {
+    "lead_id": "LEAD-0013",
+    "category": "support_escalation",
+    "confidence": 0.75,
+    "description": "High-value account has not received response to billing dispute in 7 days.",
+    "expected_action": "escalate",
+    "expected_outcome": "correct"
+  },
+  {
+    "lead_id": "LEAD-0014",
+    "category": "manual_review",
+    "confidence": 0.55,
+    "description": "Mid-size company, partial form data, no company size, but mentions growing team.",
+    "expected_action": "manual_review",
+    "expected_outcome": "correct"
+  },
+  {
+    "lead_id": "LEAD-0015",
+    "category": "manual_review",
+    "confidence": 0.48,
+    "description": "Lead from healthcare sector, slow to respond, may be on extended evaluation cycle.",
+    "expected_action": "manual_review",
+    "expected_outcome": "correct"
+  },
+  {
+    "lead_id": "LEAD-0016",
+    "category": "manual_review",
+    "confidence": 0.52,
+    "description": "Previously disqualified lead from 75 days ago, re-submitted with updated company info.",
+    "expected_action": "manual_review",
+    "expected_outcome": "correct"
+  },
+  {
+    "lead_id": "LEAD-0017",
+    "category": "manual_review",
+    "confidence": 0.49,
+    "description": "Lead with product-specific API questions but no company size or revenue data provided.",
+    "expected_action": "manual_review",
+    "expected_outcome": "correct"
+  },
+  {
+    "lead_id": "LEAD-0018",
+    "category": "high_value",
+    "confidence": 0.83,
+    "description": "Director-level contact, 900-employee logistics company, requesting custom pricing proposal.",
+    "expected_action": "qualify",
+    "expected_outcome": "correct"
+  },
+  {
+    "lead_id": "LEAD-0019",
+    "category": "high_value",
+    "confidence": 0.77,
+    "description": "Inbound referral from existing customer, confirmed budget, Q3 implementation timeline.",
+    "expected_action": "qualify",
+    "expected_outcome": "correct"
+  },
+  {
+    "lead_id": "LEAD-0020",
+    "category": "support_escalation",
+    "confidence": 0.68,
+    "description": "Customer data export failed repeatedly over 48 hours, data compliance team involved.",
+    "expected_action": "escalate",
+    "expected_outcome": "correct"
+  },
+  {
+    "lead_id": "LEAD-0021",
+    "category": "low_value",
+    "confidence": 0.2,
+    "description": "Single-person startup, pre-revenue, looking for free tier, no growth indicators.",
+    "expected_action": "disqualify",
+    "expected_outcome": "correct"
+  },
+  {
+    "lead_id": "LEAD-0022",
+    "category": "manual_review",
+    "confidence": 0.51,
+    "description": "Lead from ambiguous industry code, description mentions automation but no context.",
+    "expected_action": "manual_review",
+    "expected_outcome": "correct"
+  },
+  {
+    "lead_id": "LEAD-0023",
+    "category": "high_value",
+    "confidence": 0.86,
+    "description": "Scale-up company raised Series B last month, CRO contact, active buying timeline.",
+    "expected_action": "qualify",
+    "expected_outcome": "correct"
+  },
+  {
+    "lead_id": "LEAD-0024",
+    "category": "low_value",
+    "confidence": 0.24,
+    "description": "Competitor employee contact, likely doing market research, no buying intent.",
+    "expected_action": "disqualify",
+    "expected_outcome": "correct"
+  },
+  {
+    "lead_id": "LEAD-0025",
+    "category": "support_escalation",
+    "confidence": 0.72,
+    "description": "Premium tier customer reporting repeated login failures over 3 days, no fix delivered.",
+    "expected_action": "escalate",
+    "expected_outcome": "correct"
+  },
+  {
+    "lead_id": "LEAD-0026",
+    "category": "high_value",
+    "confidence": 0.82,
+    "description": "Enterprise lead, 800 employees. Auto-disqualified due to misconfigured routing rule.",
+    "expected_action": "qualify",
+    "expected_outcome": "incorrect"
+  },
+  {
+    "lead_id": "LEAD-0027",
+    "category": "high_value",
+    "confidence": 0.78,
+    "description": "CTO contact, API questions, confirmed budget. Routed to low-priority queue by error.",
+    "expected_action": "qualify",
+    "expected_outcome": "incorrect"
+  },
+  {
+    "lead_id": "LEAD-0028",
+    "category": "support_escalation",
+    "confidence": 0.74,
+    "description": "Customer escalation held 8 hours with no owner. Alert failed due to config error.",
+    "expected_action": "escalate",
+    "expected_outcome": "incorrect"
+  },
+  {
+    "lead_id": "LEAD-0029",
+    "category": "manual_review",
+    "confidence": 0.53,
+    "description": "Ambiguous lead auto-disqualified instead of sent to review. Reviewer would have qualified.",
+    "expected_action": "manual_review",
+    "expected_outcome": "incorrect"
+  },
+  {
+    "lead_id": "LEAD-0030",
+    "category": "high_value",
+    "confidence": 0.79,
+    "description": "Returning customer re-inquiry. Treated as new cold lead and placed in low-priority.",
+    "expected_action": "qualify",
+    "expected_outcome": "incorrect"
+  },
+  {
+    "lead_id": "LEAD-0031",
+    "category": "ambiguous",
+    "confidence": 0.45,
+    "description": "Mid-range confidence, partial data. Auto-disqualified by threshold bug.",
+    "expected_action": "manual_review",
+    "expected_outcome": "incorrect"
+  },
+  {
+    "lead_id": "LEAD-0032",
+    "category": "low_value",
+    "confidence": 0.35,
+    "description": "Lead with low score but company had 3x headcount growth. Disqualified \u2014 missed signal.",
+    "expected_action": "manual_review",
+    "expected_outcome": "incorrect"
+  },
+  {
+    "lead_id": "LEAD-0033",
+    "category": "high_value",
+    "confidence": 0.8,
+    "description": "Enrichment data showed company in administration. Qualified and contacted \u2014 wasted resource.",
+    "expected_action": "manual_review",
+    "expected_outcome": "incorrect"
+  },
+  {
+    "lead_id": "LEAD-0034",
+    "category": "support_escalation",
+    "confidence": 0.65,
+    "description": "Escalation case incorrectly auto-resolved by system without human review.",
+    "expected_action": "escalate",
+    "expected_outcome": "incorrect"
+  },
+  {
+    "lead_id": "LEAD-0035",
+    "category": "manual_review",
+    "confidence": 0.5,
+    "description": "Healthcare lead disqualified quickly. Sector requires extended review cycle.",
+    "expected_action": "manual_review",
+    "expected_outcome": "incorrect"
+  },
+  {
+    "lead_id": "LEAD-0036",
+    "category": "high_value",
+    "confidence": 0.88,
+    "description": "High-confidence lead with duplicate ID \u2014 processed twice, both records qualified incorrectly.",
+    "expected_action": "qualify",
+    "expected_outcome": "incorrect"
+  },
+  {
+    "lead_id": "LEAD-0037",
+    "category": "low_value",
+    "confidence": 0.28,
+    "description": "Lead contained product-specific integration questions. Disqualified \u2014 high-intent signal missed.",
+    "expected_action": "manual_review",
+    "expected_outcome": "incorrect"
+  },
+  {
+    "lead_id": "LEAD-0038",
+    "category": "ambiguous",
+    "confidence": 0.48,
+    "description": "Lead from company that recently acquired a competitor \u2014 ambiguous but held not reviewed.",
+    "expected_action": "manual_review",
+    "expected_outcome": "incorrect"
+  },
+  {
+    "lead_id": "LEAD-0039",
+    "category": "support_escalation",
+    "confidence": 0.77,
+    "description": "Enterprise billing dispute routed to standard support, not escalation. Account at risk.",
+    "expected_action": "escalate",
+    "expected_outcome": "incorrect"
+  },
+  {
+    "lead_id": "LEAD-0040",
+    "category": "high_value",
+    "confidence": 0.75,
+    "description": "Series A startup, strong buying signals. Disqualified due to company age threshold misconfiguration.",
+    "expected_action": "qualify",
+    "expected_outcome": "incorrect"
+  },
+  {
+    "lead_id": "LEAD-0041",
+    "category": "manual_review",
+    "confidence": 0.54,
+    "description": "Lead with pricing questions routed to discard queue \u2014 intent signal not checked.",
+    "expected_action": "manual_review",
+    "expected_outcome": "incorrect"
+  },
+  {
+    "lead_id": "LEAD-0042",
+    "category": "high_value",
+    "confidence": 0.84,
+    "description": "Partner referral with confirmed budget auto-held by new queue rule. Never reviewed.",
+    "expected_action": "qualify",
+    "expected_outcome": "incorrect"
+  },
+  {
+    "lead_id": "LEAD-0043",
+    "category": "support_escalation",
+    "confidence": 0.6,
+    "description": "Customer sent 4 follow-up emails in 48 hours. Marked as duplicate and suppressed.",
+    "expected_action": "escalate",
+    "expected_outcome": "incorrect"
+  },
+  {
+    "lead_id": "LEAD-0044",
+    "category": "low_value",
+    "confidence": 0.32,
+    "description": "Micro-business lead, but owner was also investor in target vertical \u2014 opportunity missed.",
+    "expected_action": "manual_review",
+    "expected_outcome": "incorrect"
+  },
+  {
+    "lead_id": "LEAD-0045",
+    "category": "ambiguous",
+    "confidence": 0.47,
+    "description": "Form submission with conflicting data points. System chose qualify without review.",
+    "expected_action": "manual_review",
+    "expected_outcome": "incorrect"
+  },
+  {
+    "lead_id": "LEAD-0046",
+    "category": "high_value",
+    "confidence": 0.89,
+    "description": "Inbound from analyst at large PE firm evaluating vendor stack. Disqualified as non-buyer.",
+    "expected_action": "qualify",
+    "expected_outcome": "incorrect"
+  },
+  {
+    "lead_id": "LEAD-0047",
+    "category": "manual_review",
+    "confidence": 0.56,
+    "description": "Lead re-submitted after previous hold expired. System created new record, lost history.",
+    "expected_action": "manual_review",
+    "expected_outcome": "incorrect"
+  },
+  {
+    "lead_id": "LEAD-0048",
+    "category": "support_escalation",
+    "confidence": 0.69,
+    "description": "Data sync failure affecting 3 enterprise accounts. Logged as low-priority ticket.",
+    "expected_action": "escalate",
+    "expected_outcome": "incorrect"
+  },
+  {
+    "lead_id": "LEAD-0049",
+    "category": "high_value",
+    "confidence": 0.81,
+    "description": "Lead from logistics company post-acquisition \u2014 enrichment returned old company data.",
+    "expected_action": "qualify",
+    "expected_outcome": "incorrect"
+  },
+  {
+    "lead_id": "LEAD-0050",
+    "category": "ambiguous",
+    "confidence": 0.44,
+    "description": "Strong description but very low confidence \u2014 model uncertainty masked genuine intent.",
+    "expected_action": "manual_review",
+    "expected_outcome": "incorrect"
+  },
+  {
+    "lead_id": "LEAD-0051",
+    "category": "ambiguous",
+    "confidence": 0.5,
+    "description": "Mid-range confidence, partial company data, no job title. Could go either way.",
+    "expected_action": "manual_review",
+    "expected_outcome": "ambiguous"
+  },
+  {
+    "lead_id": "LEAD-0052",
+    "category": "ambiguous",
+    "confidence": 0.53,
+    "description": "Company name matches known account but contact is unknown. Possible employee inquiry.",
+    "expected_action": "manual_review",
+    "expected_outcome": "ambiguous"
+  },
+  {
+    "lead_id": "LEAD-0053",
+    "category": "ambiguous",
+    "confidence": 0.47,
+    "description": "Disqualified 6 months ago, re-submitting now. Context may have changed.",
+    "expected_action": "manual_review",
+    "expected_outcome": "ambiguous"
+  },
+  {
+    "lead_id": "LEAD-0054",
+    "category": "ambiguous",
+    "confidence": 0.49,
+    "description": "High revenue company but description is too generic to assess intent.",
+    "expected_action": "manual_review",
+    "expected_outcome": "ambiguous"
+  },
+  {
+    "lead_id": "LEAD-0055",
+    "category": "ambiguous",
+    "confidence": 0.52,
+    "description": "Enrichment returned data older than 45 days. Revenue figure unverifiable.",
+    "expected_action": "hold",
+    "expected_outcome": "ambiguous"
+  },
+  {
+    "lead_id": "LEAD-0056",
+    "category": "ambiguous",
+    "confidence": 0.55,
+    "description": "Lead from public sector organisation \u2014 procurement cycles are long and opaque.",
+    "expected_action": "manual_review",
+    "expected_outcome": "ambiguous"
+  },
+  {
+    "lead_id": "LEAD-0057",
+    "category": "ambiguous",
+    "confidence": 0.46,
+    "description": "Confidence in uncertain band (0.45\u20130.55). Model is statistically unreliable here.",
+    "expected_action": "manual_review",
+    "expected_outcome": "ambiguous"
+  },
+  {
+    "lead_id": "LEAD-0058",
+    "category": "ambiguous",
+    "confidence": 0.51,
+    "description": "Lead mentions competitor product by name \u2014 could be evaluating alternatives or churning.",
+    "expected_action": "manual_review",
+    "expected_outcome": "ambiguous"
+  },
+  {
+    "lead_id": "LEAD-0059",
+    "category": "ambiguous",
+    "confidence": 0.48,
+    "description": "Healthcare company, decision-making timeline unclear, regulatory environment complex.",
+    "expected_action": "manual_review",
+    "expected_outcome": "ambiguous"
+  },
+  {
+    "lead_id": "LEAD-0060",
+    "category": "ambiguous",
+    "confidence": 0.54,
+    "description": "Non-English company form submission, auto-translated, some fields uncertain.",
+    "expected_action": "manual_review",
+    "expected_outcome": "ambiguous"
+  },
+  {
+    "lead_id": "LEAD-0061",
+    "category": "ambiguous",
+    "confidence": 0.5,
+    "description": "Startup pre-product-market fit, could scale rapidly or fold within 6 months.",
+    "expected_action": "hold",
+    "expected_outcome": "ambiguous"
+  },
+  {
+    "lead_id": "LEAD-0062",
+    "category": "ambiguous",
+    "confidence": 0.43,
+    "description": "Company size listed as 1\u201310 employees but revenue figure suggests much larger operation.",
+    "expected_action": "manual_review",
+    "expected_outcome": "ambiguous"
+  },
+  {
+    "lead_id": "LEAD-0063",
+    "category": "ambiguous",
+    "confidence": 0.57,
+    "description": "Previous support case unresolved \u2014 relationship status unclear before qualification.",
+    "expected_action": "hold",
+    "expected_outcome": "ambiguous"
+  },
+  {
+    "lead_id": "LEAD-0064",
+    "category": "ambiguous",
+    "confidence": 0.52,
+    "description": "Duplicate lead with slight variation in email domain. Possibly same person.",
+    "expected_action": "manual_review",
+    "expected_outcome": "ambiguous"
+  },
+  {
+    "lead_id": "LEAD-0065",
+    "category": "ambiguous",
+    "confidence": 0.45,
+    "description": "Lead from consultancy \u2014 unclear if buying for self or on behalf of end client.",
+    "expected_action": "manual_review",
+    "expected_outcome": "ambiguous"
+  },
+  {
+    "lead_id": "LEAD-0066",
+    "category": "ambiguous",
+    "confidence": 0.58,
+    "description": "Company recently IPO'd \u2014 internal buying processes likely in flux.",
+    "expected_action": "manual_review",
+    "expected_outcome": "ambiguous"
+  },
+  {
+    "lead_id": "LEAD-0067",
+    "category": "ambiguous",
+    "confidence": 0.5,
+    "description": "Buying signal in description but legal entity name does not match enrichment data.",
+    "expected_action": "manual_review",
+    "expected_outcome": "ambiguous"
+  },
+  {
+    "lead_id": "LEAD-0068",
+    "category": "ambiguous",
+    "confidence": 0.44,
+    "description": "Strong description quality but confidence score is below the reliable threshold.",
+    "expected_action": "manual_review",
+    "expected_outcome": "ambiguous"
+  },
+  {
+    "lead_id": "LEAD-0069",
+    "category": "ambiguous",
+    "confidence": 0.53,
+    "description": "Lead from agency \u2014 could be sourcing for client, speculative, or genuine buy.",
+    "expected_action": "manual_review",
+    "expected_outcome": "ambiguous"
+  },
+  {
+    "lead_id": "LEAD-0070",
+    "category": "ambiguous",
+    "confidence": 0.56,
+    "description": "Company underwent management buyout 30 days ago \u2014 new leadership, unknown priorities.",
+    "expected_action": "hold",
+    "expected_outcome": "ambiguous"
+  },
+  {
+    "lead_id": "LEAD-0071",
+    "category": "ambiguous",
+    "confidence": 0.47,
+    "description": "Contact gave personal email, not business email \u2014 intent and authority unclear.",
+    "expected_action": "manual_review",
+    "expected_outcome": "ambiguous"
+  },
+  {
+    "lead_id": "LEAD-0072",
+    "category": "ambiguous",
+    "confidence": 0.51,
+    "description": "Positive enrichment data but lead description has urgent tone suggesting crisis purchase.",
+    "expected_action": "manual_review",
+    "expected_outcome": "ambiguous"
+  },
+  {
+    "lead_id": "LEAD-0073",
+    "category": "ambiguous",
+    "confidence": 0.49,
+    "description": "Mid-size logistics company, description mentions both current vendor and evaluation.",
+    "expected_action": "manual_review",
+    "expected_outcome": "ambiguous"
+  },
+  {
+    "lead_id": "LEAD-0074",
+    "category": "ambiguous",
+    "confidence": 0.55,
+    "description": "Lead from charity/NGO \u2014 different procurement rules, budget cycles non-standard.",
+    "expected_action": "manual_review",
+    "expected_outcome": "ambiguous"
+  },
+  {
+    "lead_id": "LEAD-0075",
+    "category": "ambiguous",
+    "confidence": 0.52,
+    "description": "High email open rate on prior nurture sequence but no form submission until now.",
+    "expected_action": "manual_review",
+    "expected_outcome": "ambiguous"
+  }
+]
