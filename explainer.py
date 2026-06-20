@@ -1,5 +1,5 @@
 """
-explanation/explainer.py
+explainer.py
 Explanation layer.
 
 Takes decision output + retrieval result + lead input and produces

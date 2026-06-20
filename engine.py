@@ -1,5 +1,5 @@
 """
-retrieval/engine.py
+engine.py
 RAG retrieval layer.
 
 Primary mode:  FAISS + sentence-transformers (all-MiniLM-L6-v2)
@@ -25,7 +25,7 @@ from schemas import RetrievedDocument, RetrievalResult
 # ─── Constants ────────────────────────────────────────────────────────────────
 
 TOP_K = 3
-KNOWLEDGE_BASE_PATH = Path(__file__).parent.parent / "data" / "knowledge_base.json"
+KNOWLEDGE_BASE_PATH = Path(__file__).parent / "knowledge_base.json"
 
 # ─── TF-IDF Fallback Embedder ─────────────────────────────────────────────────
 

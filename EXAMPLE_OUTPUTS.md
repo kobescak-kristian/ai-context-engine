@@ -1,4 +1,4 @@
-# P5 RAG Decision Support System — Example Outputs
+# AI Context Engine — Example Outputs
 
 ---
 
@@ -74,7 +74,7 @@ Raw JSON input
 
 ---
 
-## Example 1 — High-Value Lead (Full Pipeline)
+## Example 1 — High-Value Lead (Deterministic Fallback — no API key set)
 
 ### Input
 ```json
@@ -222,7 +222,7 @@ Result: { "is_valid": false, "errors": ["Missing required field: description"] }
 
 ---
 
-## Example 5 — Five Retrieval Results
+## Example 5 — Sample Retrieval Queries
 
 ### Query: enterprise lead high value qualify
 ```

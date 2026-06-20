@@ -52,6 +52,56 @@ evaluation set covering correct, incorrect, and ambiguous decisions.
 - Full chain — input, retrieved documents, decision, explanation —
   persisted to SQLite for cross-run audit
 
+## Installation
+
+```bash
+git clone https://github.com/kobescak-kristian/ai-context-engine
+cd ai-context-engine
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env   # then add your ANTHROPIC_API_KEY if you have one
+```
+
+**Without an API key** the system runs in deterministic fallback mode — retrieval,
+validation, explanation, and audit trail all work; the LLM decision layer is replaced
+by rule-based routing. See [Known Limitations](#known-limitations).
+
+**With semantic vector retrieval (optional):** install `sentence-transformers` for
+higher-quality retrieval. Without it the system falls back to TF-IDF automatically:
+
+```bash
+pip install sentence-transformers
+```
+
+## Quick Start
+
+```bash
+# Start the API server
+uvicorn app:app --reload --port 8000
+
+# Run a case through the full pipeline
+curl -X POST http://localhost:8000/decision-support \
+  -H "Content-Type: application/json" \
+  -d '{
+    "lead_id": "LEAD-001",
+    "category": "high_value",
+    "description": "Enterprise SaaS company, 700 employees, CTO requested demo and pricing.",
+    "confidence": 0.84
+  }'
+
+# Compare with vs without RAG context
+curl -X POST http://localhost:8000/decision-support/compare \
+  -H "Content-Type: application/json" \
+  -d '{"lead_id": "LEAD-001", "category": "high_value",
+       "description": "Enterprise SaaS, CTO contact, clear buying intent.", "confidence": 0.84}'
+
+# Retrieve stored decisions
+curl http://localhost:8000/explanations
+
+# Interactive API docs
+open http://localhost:8000/docs
+```
+
 ## Architecture
 
 ![AI Context Engine Overview](ai-context-engine_architecture.png)
@@ -60,10 +110,10 @@ evaluation set covering correct, incorrect, and ambiguous decisions.
 
 1. **Input** — structured case received and validated
    (`lead_id`, `category`, `description`, `confidence`)
-2. **Retrieval (RAG)** — FAISS + sentence-transformers search over the
-   knowledge base returns the most relevant past cases and rules;
-   falls back to TF-IDF retrieval when embeddings are unavailable, so
-   the system runs anywhere
+2. **Retrieval (RAG)** — FAISS search over the knowledge base returns
+   the most relevant past cases and rules; uses sentence-transformers
+   embeddings when available, falls back to TF-IDF automatically, so
+   the system runs anywhere without requiring the embedding model
 3. **Decision support** — the model receives the input plus retrieved
    context and returns strict JSON: `recommended_action`, `reasoning`,
    `supporting_evidence`, `confidence_adjusted`
@@ -99,11 +149,27 @@ evaluation set covering correct, incorrect, and ambiguous decisions.
 | `GET /context/{lead_id}` | Inspect the retrieved context behind a specific decision |
 | `GET /health` | Service health check |
 
+**Request payload** (`POST /decision-support` and `/compare`):
+
+```json
+{
+  "lead_id":       "LEAD-001",
+  "category":      "high_value",
+  "description":   "...",
+  "confidence":    0.84,
+  "context_query": "(optional) override the retrieval query"
+}
+```
+
+Valid `category` values: `high_value` · `low_value` · `manual_review` ·
+`support_escalation` · `ambiguous` · `disqualified`
+
 ## Stack
 
-Python 3.11+ · Pydantic v2 · FAISS · sentence-transformers ·
-TF-IDF fallback · Claude API (via httpx) · FastAPI · SQLite ·
-python-dotenv. (See `requirements.txt` for exact versions.)
+Python 3.11+ · Pydantic v2 · FAISS · TF-IDF fallback · Claude API
+(via httpx) · FastAPI · SQLite · python-dotenv ·
+sentence-transformers *(optional — semantic retrieval upgrade)*.
+(See `requirements.txt` for exact versions.)
 
 ## Key Design Decisions
 
@@ -152,20 +218,25 @@ Complete — v1.0
 ```
 ai-context-engine/
 ├── app.py                  # FastAPI app and endpoint definitions
-├── pipeline.py             # RAG retrieval pipeline (FAISS + TF-IDF fallback)
-├── engine.py               # Decision support — calls model with retrieved context
+├── pipeline.py             # Orchestrator — runs all layers in sequence
+├── engine.py               # RAG retrieval layer (FAISS + TF-IDF fallback)
 ├── validator.py            # Pydantic validation + deterministic fallback
 ├── explainer.py            # Structured explanation generation
 ├── db.py                   # SQLite storage (decisions + retrievals tables)
 ├── schemas.py              # Pydantic data models
-├── support.py              # Shared utilities
+├── support.py              # LLM decision support layer
 ├── dataset_generator.py    # Synthetic knowledge base and eval set generator
 ├── knowledge_base.json     # 27 documents — past cases, decision rules, notes
 ├── eval_dataset.json       # 75 records — correct / incorrect / ambiguous
 ├── EXAMPLE_OUTPUTS.md      # Sample pipeline outputs
-├── requirements.txt
-└── mnt/                    # Module output scaffold (generated)
+├── .env.example            # Environment variable template
+└── requirements.txt
 ```
+
+**Eval dataset:** `eval_dataset.json` contains 75 labelled records
+(25 correct · 25 incorrect · 25 ambiguous). To run them through the live pipeline,
+start the server and POST each record to `/decision-support`. The `expected_action`
+and `expected_outcome` fields are ground-truth labels for offline comparison.
 
 ## System Context
 

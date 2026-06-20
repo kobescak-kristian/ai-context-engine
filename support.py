@@ -1,5 +1,5 @@
 """
-decision/support.py
+support.py
 Decision support layer.
 
 Sends lead input + retrieved context to LLM.
@@ -23,7 +23,7 @@ from schemas import (
     RetrievalResult,
     RecommendedAction,
 )
-from validation.validator import validate_decision_output, deterministic_fallback
+from validator import validate_decision_output, deterministic_fallback
 
 # ─── Config ───────────────────────────────────────────────────────────────────
 

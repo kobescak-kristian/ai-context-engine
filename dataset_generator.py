@@ -9,7 +9,6 @@ Corpus (documents stored in vector index):
 
 Eval dataset:
   - 75 records split across correct / incorrect / ambiguous outcomes
-  - consistent with CRM/lead qualification domain from P1–P4
 """
 
 import json
@@ -552,14 +551,14 @@ def generate_dataset() -> list[dict]:
     return dataset
 
 
-def save_all(output_dir: str = "/home/claude/p5_rag_decision_support/data") -> None:
+def save_all(output_dir: str = ".") -> None:
     Path(output_dir).mkdir(parents=True, exist_ok=True)
 
     # Save knowledge base
     kb_path = Path(output_dir) / "knowledge_base.json"
     with open(kb_path, "w") as f:
         json.dump(KNOWLEDGE_BASE, f, indent=2)
-    print(f"Knowledge base saved: {len(KNOWLEDGE_BASE)} documents → {kb_path}")
+    print(f"Knowledge base saved: {len(KNOWLEDGE_BASE)} documents -> {kb_path}")
 
     # Save eval dataset
     dataset = generate_dataset()
@@ -570,7 +569,7 @@ def save_all(output_dir: str = "/home/claude/p5_rag_decision_support/data") -> N
     correct  = sum(1 for r in dataset if r["expected_outcome"] == "correct")
     incorrect= sum(1 for r in dataset if r["expected_outcome"] == "incorrect")
     ambiguous= sum(1 for r in dataset if r["expected_outcome"] == "ambiguous")
-    print(f"Eval dataset saved: {len(dataset)} records → {ds_path}")
+    print(f"Eval dataset saved: {len(dataset)} records -> {ds_path}")
     print(f"  Correct: {correct} | Incorrect: {incorrect} | Ambiguous: {ambiguous}")
 
 

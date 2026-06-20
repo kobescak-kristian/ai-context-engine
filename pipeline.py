@@ -25,11 +25,11 @@ from schemas import (
     DecisionInput,
     ValidationResult,
 )
-from validation.validator import validate_input
-from retrieval.engine import retrieve, build_query
-from decision.support import get_decision, get_decision_no_context
-from explanation.explainer import explain
-from storage.db import store_pipeline_record
+from validator import validate_input
+from engine import retrieve, build_query
+from support import get_decision, get_decision_no_context
+from explainer import explain
+from db import store_pipeline_record
 
 
 # ─── Result container (not a Pydantic model — internal use) ──────────────────

@@ -85,7 +85,7 @@ class RetrievedDocument(BaseModel):
 class RetrievalResult(BaseModel):
     query_used: str
     retrieved_context: list[RetrievedDocument]
-    retrieval_mode: str       # "faiss" | "tfidf_fallback"
+    retrieval_mode: str       # "sentence_transformers" | "tfidf_fallback" | "none"
     top_k: int
 
 

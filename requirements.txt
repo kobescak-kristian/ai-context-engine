@@ -4,4 +4,6 @@ pydantic>=2.0.0
 fastapi>=0.100.0
 uvicorn>=0.23.0
 httpx>=0.24.0
-# sentence-transformers>=2.2.0  # primary embedder — install when disk allows
+python-dotenv>=1.0.0
+# sentence-transformers>=2.2.0  # optional: enables semantic vector retrieval (all-MiniLM-L6-v2)
+#                                # system falls back to TF-IDF automatically without it

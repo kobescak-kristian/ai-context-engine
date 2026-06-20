@@ -1,5 +1,5 @@
 """
-storage/db.py
+db.py
 SQLite audit trail.
 
 Stores every pipeline run — input, retrieval, decision, explanation, validation.
@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-DB_PATH = Path(__file__).parent.parent / "db" / "p5_decisions.db"
+DB_PATH = Path(__file__).parent / "db" / "p5_decisions.db"
 
 
 # ─── Init ─────────────────────────────────────────────────────────────────────

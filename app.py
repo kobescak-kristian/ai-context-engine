@@ -1,30 +1,29 @@
 """
-api/app.py
+app.py
 FastAPI application.
 
 Endpoints:
-  POST /decision-support   — run full pipeline for a lead
-  GET  /explanations       — retrieve stored explanations
-  GET  /context/{lead_id}  — retrieve stored retrieval context for a lead
+  POST /decision-support         — run full pipeline for a lead
+  POST /decision-support/compare — run with vs without RAG context
+  GET  /explanations             — retrieve stored explanations
+  GET  /context/{lead_id}        — retrieve stored retrieval context for a lead
+  GET  /health                   — service health check
 """
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
-# Allow imports from project root
-sys.path.insert(0, str(Path(__file__).parent.parent))
+from dotenv import load_dotenv
+load_dotenv()
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 
 from pipeline import run_pipeline, run_comparison
-from storage.db import get_explanations, get_context_for_lead
+from db import get_explanations, get_context_for_lead
 
 app = FastAPI(
-    title="P5 RAG Decision Support System",
+    title="AI Context Engine",
     description=(
         "Decision support system with RAG retrieval, structured LLM decisions, "
         "deterministic fallback, validation, and SQLite audit trail."
@@ -113,4 +112,4 @@ def get_context(lead_id: str) -> list[dict]:
 
 @app.get("/health")
 def health() -> dict:
-    return {"status": "ok", "system": "P5 RAG Decision Support System"}
+    return {"status": "ok", "system": "AI Context Engine"}

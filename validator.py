@@ -1,5 +1,5 @@
 """
-validation/validator.py
+validator.py
 Pre-action validation layer.
 
 Pattern from P1/P2: validate before any downstream action is taken.
