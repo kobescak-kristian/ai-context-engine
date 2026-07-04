@@ -1,6 +1,6 @@
 # AI Context Engine (RAG Decision Support) — v1.0
 
-## The Problem With Unexplained AI Decisions
+## Problem
 
 An AI model can output a category and a confidence score. What it
 cannot do on its own is show what the decision was based on,
@@ -12,7 +12,7 @@ is questioned weeks later, "the model said so" is not an answer.
 Most RAG demos stop at answering questions. This system uses
 retrieval to support and explain an operational decision.
 
-## What This System Does
+## Solution
 
 A retrieval-grounded decision support layer. For each incoming case
 it retrieves relevant past cases and rules from a knowledge base,
@@ -209,9 +209,11 @@ with a managed vector store.
 *Production path: managed vector database · embedding tuning on real
 cases · API authentication · PostgreSQL.*
 
-## Status
+## Version Log
 
-Complete — v1.0
+| Version | Date | Change |
+|---|---|---|
+| v1.0 | 2026-06-20 | Initial complete release — see [Outcome](#outcome) |
 
 ## Repository Structure
 
