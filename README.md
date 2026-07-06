@@ -22,7 +22,8 @@ the full chain to an audit trail.
 
 **This is not a chatbot or a Q&A system.** It is a decision support
 system with memory and explainability — every recommendation is
-grounded in retrieved precedent and is fully traceable.
+fully traceable, and grounded in retrieved precedent when the LLM
+layer is active.
 
 **Who this is for:** Teams using AI for operational decisions — lead
 qualification, case routing, triage — where the decision has to be
