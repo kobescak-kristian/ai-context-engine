@@ -39,9 +39,14 @@ decision defensible after the fact.
 
 ## Outcome
 
-Built and verified end to end against a 27-document knowledge base
-(past cases, decision rules, operational notes) and a 75-record
-evaluation set covering correct, incorrect, and ambiguous decisions.
+Built against a 27-document knowledge base (past cases, decision
+rules, operational notes) and a 75-record evaluation set covering
+correct, incorrect, and ambiguous decisions. Verification is a
+committed, runnable artifact, not a claim: `run_eval.py` posts all 75
+records to the live server and gates the result against thresholds
+fixed in `eval_config.py` before any run happened. The fallback-mode
+run scored 68/75 — see [EVAL_RESULTS.md](EVAL_RESULTS.md) for the
+full output, the named misses, and its limitations.
 
 - Retrieval always runs and every retrieved document is persisted;
   decisions are grounded in that context only when the LLM layer is
@@ -248,15 +253,19 @@ ai-context-engine/
 ├── dataset_generator.py    # Synthetic knowledge base and eval set generator
 ├── knowledge_base.json     # 27 documents — past cases, decision rules, notes
 ├── eval_dataset.json       # 75 records — correct / incorrect / ambiguous
+├── run_eval.py             # Eval harness — posts eval_dataset.json to the live server
+├── eval_config.py          # Eval gate thresholds (committed before the first run)
+├── EVAL_RESULTS.md         # Committed eval run output
 ├── EXAMPLE_OUTPUTS.md      # Sample pipeline outputs
 ├── .env.example            # Environment variable template
 └── requirements.txt
 ```
 
 **Eval dataset:** `eval_dataset.json` contains 75 labelled records
-(25 correct · 25 incorrect · 25 ambiguous). To run them through the live pipeline,
-start the server and POST each record to `/decision-support`. The `expected_action`
-and `expected_outcome` fields are ground-truth labels for offline comparison.
+(25 correct · 25 incorrect · 25 ambiguous). `run_eval.py` posts all 75 to the live
+`/decision-support` endpoint, checks `recommended_action` against `expected_action`,
+and gates the result against the thresholds in `eval_config.py`. See
+[EVAL_RESULTS.md](EVAL_RESULTS.md) for the committed run.
 
 ## System Context
 
