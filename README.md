@@ -42,8 +42,13 @@ Built and verified end to end against a 27-document knowledge base
 (past cases, decision rules, operational notes) and a 75-record
 evaluation set covering correct, incorrect, and ambiguous decisions.
 
-- Every decision grounded in retrieved context, not the model's
-  unaided guess
+- Retrieval always runs and every retrieved document is persisted;
+  decisions are grounded in that context only when the LLM layer is
+  active (a real API key configured). In the default, out-of-box
+  fallback mode, the system says so on every single response —
+  `context_was_used: false` plus an explicit risk flag — rather than
+  silently claiming a grounding it didn't do. See
+  [Known Limitations](#known-limitations)
 - A with/without-context comparison path runs the same input through
   both grounded and ungrounded decisions, making the effect of
   retrieval visible on demand
@@ -63,8 +68,11 @@ cp .env.example .env   # then add your ANTHROPIC_API_KEY if you have one
 ```
 
 **Without an API key** the system runs in deterministic fallback mode — retrieval,
-validation, explanation, and audit trail all work; the LLM decision layer is replaced
-by rule-based routing. See [Known Limitations](#known-limitations).
+validation, explanation, and audit trail all work, but the decision itself is made by
+rule-based routing on the input fields only (`confidence`, `category`); the retrieved
+context is stored and shown in the response, but it does not influence the decision in
+this mode (`context_was_used: false`). This is the configuration this README's own
+Quick Start produces. See [Known Limitations](#known-limitations).
 
 **With semantic vector retrieval (optional):** install `sentence-transformers` for
 higher-quality retrieval. Without it the system falls back to TF-IDF automatically:
@@ -192,6 +200,15 @@ the stored retrieval chain are not add-ons; they are the point. They
 are what make the decision trustworthy.
 
 ## Known Limitations
+
+**Grounding requires a real API key.** In fallback mode — the mode this repo's own
+Quick Start produces — decisions come from deterministic rule-based routing on
+`confidence` and `category` only; the retrieved context is not what the decision is
+based on, even though it is retrieved and stored. If you ran the quickstart and every
+response says `context_was_used: false`, that is not a bug: the "grounded in retrieved
+context" outcome claim above describes the LLM-active path, which requires a configured
+`ANTHROPIC_API_KEY` and has not been recorded end-to-end in this repo at the time of
+writing.
 
 **Retrieval quality is bounded by the knowledge base** — no embedding
 fine-tuning; quality scales with the size and quality of the stored
