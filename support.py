@@ -27,7 +27,7 @@ from validator import validate_decision_output, deterministic_fallback
 
 # ─── Config ───────────────────────────────────────────────────────────────────
 
-LLM_MODEL       = "claude-sonnet-4-20250514"
+LLM_MODEL       = "claude-sonnet-4-6"
 LLM_MAX_TOKENS  = 600
 LLM_API_URL     = "https://api.anthropic.com/v1/messages"
 LLM_API_KEY_ENV = "ANTHROPIC_API_KEY"
