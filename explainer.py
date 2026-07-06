@@ -67,7 +67,7 @@ def _compute_risk_flags(
         doc for doc in retrieval.retrieved_context
         if doc.similarity_score < 0.30
     ]
-    if len(low_sim_docs) == len(retrieval.retrieved_context):
+    if retrieval.retrieved_context and len(low_sim_docs) == len(retrieval.retrieved_context):
         flags.append(
             "All retrieved documents had low similarity scores (<0.30). "
             "Retrieval quality is weak — context may not be relevant."

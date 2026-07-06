@@ -298,7 +298,6 @@ Result: { "is_valid": false, "errors": ["Missing required field: description"] }
   "confidence_adjusted": 0.5,
   "risk_flags": [
     "Confidence 0.5 is in the unreliable band (0.45–0.55). Statistical confidence is low.",
-    "All retrieved documents had low similarity scores (<0.30). Retrieval quality is weak — context may not be relevant.",
     "Decision was made without context (fallback mode or no-context run). RAG layer did not contribute to this decision."
   ]
 }
@@ -307,7 +306,7 @@ Result: { "is_valid": false, "errors": ["Missing required field: description"] }
 ### Difference
 Both paths reach the same action here (manual_review via deterministic fallback). The difference is in the risk flag set:
 - With context: surfaces that a past incorrect outcome was retrieved for this pattern — actionable signal
-- Without context: flags only low similarity + fallback mode — less informative
+- Without context: flags only the confidence-band warning + fallback mode — no retrieval-based signal, because zero documents were retrieved (the "low similarity" flag correctly does not fire when nothing was retrieved to be low-similarity — see explainer.py's guard)
 
 When the LLM layer is active (API key present), the difference becomes more significant:
 the with-context path allows the LLM to cite specific rules and past case outcomes in its reasoning,
