@@ -45,7 +45,8 @@ def init_db(db_path: Path = DB_PATH) -> None:
             explanation_json    TEXT,   -- full ExplanationOutput JSON
             input_json          TEXT,   -- full DecisionInput JSON
             validation_errors   TEXT,   -- JSON array
-            validation_warnings TEXT    -- JSON array
+            validation_warnings TEXT,   -- JSON array
+            fallback_reason     TEXT    -- why the decision layer fell back (NULL if not fallback)
         )
     """)
 
@@ -76,6 +77,7 @@ def store_pipeline_record(
     explanation_dict:   dict,
     validation_dict:    dict,
     used_fallback:      bool,
+    fallback_reason:    Optional[str] = None,
     db_path: Path = DB_PATH,
 ) -> int:
     """
@@ -95,8 +97,8 @@ def store_pipeline_record(
             recommended_action, reasoning, supporting_evidence,
             context_was_used, used_fallback,
             risk_flags, explanation_json, input_json,
-            validation_errors, validation_warnings
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            validation_errors, validation_warnings, fallback_reason
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         lead_input_dict.get("lead_id"),
         ts,
@@ -113,6 +115,7 @@ def store_pipeline_record(
         json.dumps(lead_input_dict),
         json.dumps(validation_dict.get("errors", [])),
         json.dumps(validation_dict.get("warnings", [])),
+        fallback_reason,
     ))
 
     row_id = cur.lastrowid

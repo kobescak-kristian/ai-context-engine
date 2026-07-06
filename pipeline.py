@@ -118,7 +118,7 @@ def run_pipeline(raw_input: dict) -> PipelineResult:
         )
 
     # ── 4. Decision support ──────────────────────────────────────────────────
-    decision_output, used_fallback = get_decision(lead_input, retrieval_result)
+    decision_output, used_fallback, fallback_reason = get_decision(lead_input, retrieval_result)
 
     # ── 5. Explanation ───────────────────────────────────────────────────────
     explanation_output = explain(lead_input, decision_output, retrieval_result)
@@ -138,6 +138,7 @@ def run_pipeline(raw_input: dict) -> PipelineResult:
             explanation_dict=explanation_dict,
             validation_dict=validation_dict,
             used_fallback=used_fallback,
+            fallback_reason=fallback_reason,
         )
     except Exception as exc:
         print(f"[Pipeline] Storage failed (non-fatal): {exc}")

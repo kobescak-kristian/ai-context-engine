@@ -82,11 +82,13 @@ def _format_context(retrieval: RetrievalResult) -> str:
 
 # ─── LLM call ────────────────────────────────────────────────────────────────
 
-def _call_llm(user_message: str) -> Optional[str]:
+def _call_llm(user_message: str) -> tuple[Optional[str], Optional[str]]:
+    """Returns (raw_response, failure_reason). failure_reason is None on success."""
     api_key = os.environ.get(LLM_API_KEY_ENV)
     if not api_key:
-        print(f"[Decision] No API key found in {LLM_API_KEY_ENV} — fallback will activate")
-        return None
+        reason = f"No API key found in {LLM_API_KEY_ENV}"
+        print(f"[Decision] {reason} — fallback will activate")
+        return None, reason
 
     try:
         response = httpx.post(
@@ -106,22 +108,24 @@ def _call_llm(user_message: str) -> Optional[str]:
         )
         response.raise_for_status()
         data = response.json()
-        return data["content"][0]["text"]
+        return data["content"][0]["text"], None
     except Exception as exc:
-        print(f"[Decision] LLM call failed: {exc}")
-        return None
+        reason = f"LLM call failed: {exc}"
+        print(f"[Decision] {reason}")
+        return None, reason
 
 
 # ─── Parse LLM response ───────────────────────────────────────────────────────
 
-def _parse_llm_response(raw: str) -> Optional[dict]:
-    """Strip any accidental markdown fences and parse JSON."""
+def _parse_llm_response(raw: str) -> tuple[Optional[dict], Optional[str]]:
+    """Strip any accidental markdown fences and parse JSON. Returns (parsed, failure_reason)."""
     clean = re.sub(r"```(?:json)?|```", "", raw).strip()
     try:
-        return json.loads(clean)
+        return json.loads(clean), None
     except json.JSONDecodeError as exc:
-        print(f"[Decision] JSON parse failed: {exc}\nRaw: {raw[:300]}")
-        return None
+        reason = f"JSON parse failed: {exc}"
+        print(f"[Decision] {reason}\nRaw: {raw[:300]}")
+        return None, reason
 
 
 # ─── Public interface ─────────────────────────────────────────────────────────
@@ -129,12 +133,12 @@ def _parse_llm_response(raw: str) -> Optional[dict]:
 def get_decision(
     lead_input: DecisionInput,
     retrieval: RetrievalResult,
-) -> tuple[DecisionSupportOutput, bool]:
+) -> tuple[DecisionSupportOutput, bool, Optional[str]]:
     """
     Run decision support.
 
     Returns:
-        (DecisionSupportOutput, used_fallback: bool)
+        (DecisionSupportOutput, used_fallback: bool, fallback_reason: Optional[str])
     """
     # Build user message
     context_block = _format_context(retrieval)
@@ -144,43 +148,58 @@ def get_decision(
     )
 
     # Call LLM
-    raw_response = _call_llm(user_message)
+    raw_response, call_failure = _call_llm(user_message)
 
     if raw_response:
-        parsed_dict = _parse_llm_response(raw_response)
+        parsed_dict, parse_failure = _parse_llm_response(raw_response)
         if parsed_dict:
             decision_obj, vr = validate_decision_output(parsed_dict)
             if vr.is_valid and decision_obj:
-                return decision_obj, False
+                return decision_obj, False, None
             else:
-                print(f"[Decision] Output validation failed: {vr.errors}")
+                reason = f"Output validation failed: {vr.errors}"
+                print(f"[Decision] {reason}")
+                print(f"[Decision] Using deterministic fallback for {lead_input.lead_id}")
+                return deterministic_fallback(lead_input), True, reason
+        else:
+            print(f"[Decision] Using deterministic fallback for {lead_input.lead_id}")
+            return deterministic_fallback(lead_input), True, parse_failure
 
     # Fallback
     print(f"[Decision] Using deterministic fallback for {lead_input.lead_id}")
-    return deterministic_fallback(lead_input), True
+    return deterministic_fallback(lead_input), True, call_failure
 
 
 # ─── Without-context comparison ──────────────────────────────────────────────
 
-def get_decision_no_context(lead_input: DecisionInput) -> tuple[DecisionSupportOutput, bool]:
+def get_decision_no_context(lead_input: DecisionInput) -> tuple[DecisionSupportOutput, bool, Optional[str]]:
     """
     Run decision support WITHOUT retrieved context.
     Used for comparison: with_context vs without_context.
+
+    Returns:
+        (DecisionSupportOutput, used_fallback: bool, fallback_reason: Optional[str])
     """
     user_message = (
         f"Lead input:\n{json.dumps(lead_input.model_dump(), indent=2)}"
         "\n\nNo retrieved context available. Base your decision on the input only."
     )
 
-    raw_response = _call_llm(user_message)
+    raw_response, call_failure = _call_llm(user_message)
 
     if raw_response:
-        parsed_dict = _parse_llm_response(raw_response)
+        parsed_dict, parse_failure = _parse_llm_response(raw_response)
         if parsed_dict:
             # Force context_was_used = False
             parsed_dict["context_was_used"] = False
             decision_obj, vr = validate_decision_output(parsed_dict)
             if vr.is_valid and decision_obj:
-                return decision_obj, False
+                return decision_obj, False, None
+            else:
+                reason = f"Output validation failed: {vr.errors}"
+                print(f"[Decision] {reason}")
+                return deterministic_fallback(lead_input), True, reason
+        else:
+            return deterministic_fallback(lead_input), True, parse_failure
 
-    return deterministic_fallback(lead_input), True
+    return deterministic_fallback(lead_input), True, call_failure
