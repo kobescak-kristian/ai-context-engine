@@ -180,7 +180,7 @@ Model is statistically unreliable in this range. Manual review recommended.
 ```json
 {
   "recommended_action": "manual_review",
-  "reasoning": "Deterministic fallback: confidence 0.5 or category 'ambiguous' does not meet any automatic routing threshold. Defaulting to manual review.",
+  "reasoning": "Deterministic fallback: confidence 0.51 or category 'ambiguous' does not meet any automatic routing threshold. Defaulting to manual review.",
   "confidence_adjusted": 0.51
 }
 ```
