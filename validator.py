@@ -2,7 +2,7 @@
 validator.py
 Pre-action validation layer.
 
-Pattern from P1/P2: validate before any downstream action is taken.
+Validate before any downstream action is taken.
 All failures produce a structured ValidationResult — no silent errors.
 
 Deterministic fallback: if LLM output cannot be validated,

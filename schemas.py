@@ -1,6 +1,6 @@
 """
 schemas.py
-Core Pydantic schemas for P5 RAG Decision Support System.
+Core Pydantic schemas for the AI Context Engine.
 All inputs and outputs are typed and validated before any action is taken.
 """
 

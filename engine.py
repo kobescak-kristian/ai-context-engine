@@ -120,7 +120,7 @@ class FAISSRetriever:
 
         self._index = faiss.IndexFlatIP(dim)
         self._index.add(embeddings)
-        print(f"[Retriever] Index built — {len(documents)} docs | dim={dim} | mode={self._mode}")
+        print(f"[Retriever] Index built - {len(documents)} docs | dim={dim} | mode={self._mode}")
 
     def _embed_corpus(self, corpus: list[str]) -> np.ndarray:
         # Try sentence-transformers

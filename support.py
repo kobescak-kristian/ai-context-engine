@@ -87,7 +87,7 @@ def _call_llm(user_message: str) -> tuple[Optional[str], Optional[str]]:
     api_key = os.environ.get(LLM_API_KEY_ENV)
     if not api_key:
         reason = f"No API key found in {LLM_API_KEY_ENV}"
-        print(f"[Decision] {reason} — fallback will activate")
+        print(f"[Decision] {reason} - fallback will activate")
         return None, reason
 
     try:
@@ -124,7 +124,11 @@ def _parse_llm_response(raw: str) -> tuple[Optional[dict], Optional[str]]:
         return json.loads(clean), None
     except json.JSONDecodeError as exc:
         reason = f"JSON parse failed: {exc}"
-        print(f"[Decision] {reason}\nRaw: {raw[:300]}")
+        # Sanitize before printing: a raw LLM response can contain characters the
+        # console's encoding can't represent, which would raise UnicodeEncodeError
+        # inside this except block and crash the request instead of falling back.
+        safe_raw = raw[:300].encode("ascii", errors="backslashreplace").decode("ascii")
+        print(f"[Decision] {reason}\nRaw: {safe_raw}")
         return None, reason
 
 

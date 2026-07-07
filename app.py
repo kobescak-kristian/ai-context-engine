@@ -93,7 +93,7 @@ def list_explanations(limit: int = 20) -> list[dict]:
     """
     Return recent decision + explanation records from SQLite.
     """
-    return get_explanations(limit=min(limit, 100))
+    return get_explanations(limit=max(1, min(limit, 100)))
 
 
 @app.get("/context/{lead_id}")

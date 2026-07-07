@@ -89,6 +89,11 @@ pip install sentence-transformers
 
 ## Quick Start
 
+**Shell:** the commands below use bash syntax (Git Bash, WSL, or macOS/Linux
+Terminal). On Windows PowerShell, `curl` is aliased to `Invoke-WebRequest`,
+which does not accept these arguments and will fail with a parameter-binding
+error — use `curl.exe` in place of `curl`, or run these commands in Git Bash.
+
 ```bash
 # Start the API server
 uvicorn app:app --reload --port 8000
@@ -112,8 +117,8 @@ curl -X POST http://localhost:8000/decision-support/compare \
 # Retrieve stored decisions
 curl http://localhost:8000/explanations
 
-# Interactive API docs
-open http://localhost:8000/docs
+# Interactive API docs — open in your browser:
+# http://localhost:8000/docs
 ```
 
 ## Architecture
@@ -162,6 +167,13 @@ open http://localhost:8000/docs
 | `GET /explanations` | Retrieve stored decisions with their explanations |
 | `GET /context/{lead_id}` | Inspect the retrieved context behind a specific decision |
 | `GET /health` | Service health check |
+
+**Compare persists both legs under a suffixed `lead_id`:** `/decision-support/compare`
+stores its two decisions as `{lead_id}-with-context` and `{lead_id}-without-context`
+rather than the plain `lead_id`, so they don't collide with each other or with a
+plain `/decision-support` run for the same lead. To look up one via `GET
+/explanations` or `GET /context/{lead_id}`, use the suffixed ID (e.g.
+`LEAD-001-with-context`), not the original.
 
 **Request payload** (`POST /decision-support` and `/compare`):
 
@@ -242,22 +254,27 @@ cases · API authentication · PostgreSQL.*
 
 ```
 ai-context-engine/
-├── app.py                  # FastAPI app and endpoint definitions
-├── pipeline.py             # Orchestrator — runs all layers in sequence
-├── engine.py               # RAG retrieval layer (FAISS + TF-IDF fallback)
-├── validator.py            # Pydantic validation + deterministic fallback
-├── explainer.py            # Structured explanation generation
-├── db.py                   # SQLite storage (decisions + retrievals tables)
-├── schemas.py              # Pydantic data models
-├── support.py              # LLM decision support layer
-├── dataset_generator.py    # Synthetic knowledge base and eval set generator
-├── knowledge_base.json     # 27 documents — past cases, decision rules, notes
-├── eval_dataset.json       # 75 records — correct / incorrect / ambiguous
-├── run_eval.py             # Eval harness — posts eval_dataset.json to the live server
-├── eval_config.py          # Eval gate thresholds (committed before the first run)
-├── EVAL_RESULTS.md         # Committed eval run output
-├── EXAMPLE_OUTPUTS.md      # Sample pipeline outputs
-├── .env.example            # Environment variable template
+├── adr/                     # Architecture decision records (Tier 0)
+├── .githooks/               # Pre-push validation (ARTIFACT_STANDARD check)
+├── app.py                   # FastAPI app and endpoint definitions
+├── pipeline.py              # Orchestrator — runs all layers in sequence
+├── engine.py                # RAG retrieval layer (FAISS + TF-IDF fallback)
+├── validator.py             # Pydantic validation + deterministic fallback
+├── explainer.py             # Structured explanation generation
+├── db.py                    # SQLite storage (decisions + retrievals tables)
+├── schemas.py               # Pydantic data models
+├── support.py               # LLM decision support layer
+├── dataset_generator.py     # Synthetic knowledge base and eval set generator
+├── knowledge_base.json      # 27 documents — past cases, decision rules, notes
+├── eval_dataset.json        # 75 records — correct / incorrect / ambiguous
+├── run_eval.py              # Eval harness — posts eval_dataset.json to the live server
+├── eval_config.py           # Eval gate thresholds (committed before the first run)
+├── EVAL_RESULTS.md          # Committed eval run output
+├── EXAMPLE_OUTPUTS.md       # Sample pipeline outputs
+├── ai-context-engine_architecture.png  # Architecture diagram (see Architecture section)
+├── CLAUDE.md                # ARTIFACT_STANDARD project instructions
+├── README.md                # This file
+├── .env.example             # Environment variable template
 └── requirements.txt
 ```
 

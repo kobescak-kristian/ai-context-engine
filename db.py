@@ -3,7 +3,7 @@ db.py
 SQLite audit trail.
 
 Stores every pipeline run — input, retrieval, decision, explanation, validation.
-Pattern from P1/P2: nothing leaves the system without being logged.
+Nothing leaves the system without being logged.
 
 Schema:
   decisions  — one row per pipeline run
@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-DB_PATH = Path(__file__).parent / "db" / "p5_decisions.db"
+DB_PATH = Path(__file__).parent / "db" / "decisions.db"
 
 
 # ─── Init ─────────────────────────────────────────────────────────────────────
