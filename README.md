@@ -44,9 +44,22 @@ rules, operational notes) and a 75-record evaluation set covering
 correct, incorrect, and ambiguous decisions. Verification is a
 committed, runnable artifact, not a claim: `run_eval.py` posts all 75
 records to the live server and gates the result against thresholds
-fixed in `eval_config.py` before any run happened. The fallback-mode
-run scored 68/75 — see [EVAL_RESULTS.md](EVAL_RESULTS.md) for the
-full output, the named misses, and its limitations.
+fixed in `eval_config.py` before any run happened.
+
+Two runs are recorded. The architecture is verified end to end either
+way: retrieval executes and is persisted, and when the LLM layer is
+active it cites specific retrieved document IDs in its reasoning (see
+[EXAMPLE_OUTPUTS.md](EXAMPLE_OUTPUTS.md) Example 7) and produces a
+real confidence difference between the with- and without-context legs
+of a comparison run (0.88 vs 0.78 on an identical input) — grounding
+is real, not simulated. On accuracy, the two runs disagree: the
+fallback-mode run scored 68/75 against the eval set; the keyed run
+(`claude-sonnet-4-6`) scored 58/75, below both its own gate (69/75)
+and the fallback baseline it was required to beat. This is reported
+as measured — the eval gates were fixed before either run happened
+and were not adjusted afterward. See
+[EVAL_RESULTS.md](EVAL_RESULTS.md) for the full output, the miss
+pattern, and why the keyed number reads the way it does.
 
 - Retrieval always runs and every retrieved document is persisted;
   decisions are grounded in that context only when the LLM layer is
@@ -224,9 +237,10 @@ Quick Start produces — decisions come from deterministic rule-based routing on
 `confidence` and `category` only; the retrieved context is not what the decision is
 based on, even though it is retrieved and stored. If you ran the quickstart and every
 response says `context_was_used: false`, that is not a bug: the "grounded in retrieved
-context" outcome claim above describes the LLM-active path, which requires a configured
-`ANTHROPIC_API_KEY` and has not been recorded end-to-end in this repo at the time of
-writing.
+context" outcome claim describes the LLM-active path, which requires a configured
+`ANTHROPIC_API_KEY`. That path has now been recorded end-to-end (see
+[EVAL_RESULTS.md](EVAL_RESULTS.md)) — grounding is real, but is a separate claim from
+accuracy; see "The eval set structurally favors the rule-based fallback" below.
 
 **Retrieval quality is bounded by the knowledge base** — no embedding
 fine-tuning; quality scales with the size and quality of the stored
@@ -234,6 +248,17 @@ cases.
 
 **Synthetic data** — the knowledge base and evaluation set are
 generated, not real client data.
+
+**The eval set structurally favors the rule-based fallback.** `eval_dataset.json`'s
+`expected_action` labels were generated from the same kind of threshold logic the
+deterministic fallback implements (confidence bands, category rules), because there
+is no real client data to grade against. That is one reason the keyed (LLM) run
+scored lower than the fallback run on this set (58/75 vs 68/75, see
+[EVAL_RESULTS.md](EVAL_RESULTS.md)): the fallback is being measured against labels
+shaped like its own logic, while the LLM is being measured against the same labels
+without that structural advantage. This is a property of the eval set, not a defect
+found and hidden — the honest reading is that this 75-record synthetic eval is a
+weaker signal on the keyed path than it would be against real outcome data.
 
 **No API authentication** — endpoints are open; production requires
 auth middleware.
