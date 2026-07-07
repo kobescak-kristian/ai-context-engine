@@ -51,8 +51,9 @@ way: retrieval executes and is persisted, and when the LLM layer is
 active it cites specific retrieved document IDs in its reasoning (see
 [EXAMPLE_OUTPUTS.md](EXAMPLE_OUTPUTS.md) Example 7) and produces a
 real confidence difference between the with- and without-context legs
-of a comparison run (0.88 vs 0.78 on an identical input) — grounding
-is real, not simulated. On accuracy, the two runs disagree: the
+of a comparison run (0.88 vs 0.75 on an identical input, committed
+verbatim in [EXAMPLE_OUTPUTS.md](EXAMPLE_OUTPUTS.md) Example 8) —
+grounding is real, not simulated. On accuracy, the two runs disagree: the
 fallback-mode run scored 68/75 against the eval set; the keyed run
 (`claude-sonnet-4-6`) scored 58/75, below both its own gate (69/75)
 and the fallback baseline it was required to beat. This is reported

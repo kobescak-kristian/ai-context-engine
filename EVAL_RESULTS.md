@@ -128,6 +128,8 @@ support the first with evidence and cannot support the second.
   (the originally hardcoded `claude-sonnet-4-20250514` had retired); no
   comparison against other models was attempted.
 
+The keyed with/without-context compare run referenced in the README Outcome section is committed verbatim as Example 8 in [EXAMPLE_OUTPUTS.md](EXAMPLE_OUTPUTS.md).
+
 ## Reproduce
 
 ```bash

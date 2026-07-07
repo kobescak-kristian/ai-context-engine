@@ -379,6 +379,68 @@ how this decision layer performs across the full 75-record eval set (58/75 — b
 
 ---
 
+## Example 8 — Keyed comparison run (with vs without context)
+
+`POST /decision-support/compare`, LLM layer active (`claude-sonnet-4-6`), same input
+used for the fallback-mode Example 6. Pasted verbatim from the live response — no
+hand edits.
+
+### Input
+```json
+{
+  "lead_id": "LEAD-001",
+  "category": "high_value",
+  "description": "Enterprise SaaS, CTO contact, clear buying intent.",
+  "confidence": 0.84
+}
+```
+
+### Raw Response
+```json
+{
+  "lead_id": "LEAD-001",
+  "with_context": {
+    "retrieval_mode": "tfidf_fallback",
+    "docs_retrieved": 3,
+    "recommended_action": "qualify",
+    "confidence_input": 0.84,
+    "confidence_adjusted": 0.88,
+    "reasoning": "This enterprise SaaS lead with a CTO contact and clear buying intent closely matches case_009, which had nearly identical characteristics (high-value SaaS, confidence 0.82, clear buying intent) and was correctly qualified, closing within 21 days. At confidence 0.84, the signal is strong and consistent with past successful outcomes.",
+    "supporting_evidence": "case_009 (similarity 0.465) is a near-identical precedent — same category, similar confidence, same buying intent signals — and resulted in a correct qualify decision with a fast close. rule_006 reinforces that enterprise leads should never be auto-disqualified, and case_005 illustrates the high cost (€120k lost) of under-qualifying enterprise leads, both supporting a confident qualify here rather than a more conservative hold or manual review.",
+    "risk_flags": [
+      "1 retrieved past case(s) had incorrect outcomes. Similar situations previously resulted in errors — review carefully."
+    ],
+    "used_fallback": false,
+    "db_row_id": 1
+  },
+  "without_context": {
+    "docs_retrieved": 0,
+    "recommended_action": "qualify",
+    "confidence_input": 0.84,
+    "confidence_adjusted": 0.75,
+    "reasoning": "This lead presents strong qualification signals: enterprise SaaS category, C-level (CTO) contact, and explicitly stated buying intent, all consistent with a high-value opportunity worth pursuing. The base confidence of 0.84 is solid, though without retrieved context to validate against historical patterns, a modest confidence reduction is applied.",
+    "supporting_evidence": "No retrieved context was available. Decision is based solely on input fields: category='high_value', contact level='CTO', description indicates 'clear buying intent', and confidence=0.84 — all of which are positive qualification indicators by standard lead scoring logic.",
+    "risk_flags": [
+      "Decision was made without context (fallback mode or no-context run). RAG layer did not contribute to this decision."
+    ],
+    "used_fallback": false,
+    "db_row_id": 2
+  }
+}
+```
+
+### Difference
+Both legs recommend `qualify` and both are LLM-engaged (`used_fallback: false` on
+both — context, not fallback, is the only variable). `confidence_adjusted` is 0.88
+with context vs 0.75 without: the with-context leg cites `case_009`, `rule_006`, and
+`case_005` by ID and raises confidence on the strength of a near-identical precedent;
+the without-context leg reasons from the input fields alone and lands lower. This is
+the committed evidence behind the with/without confidence-diff claim in the README
+Outcome section — the actual numbers from this run are 0.88 and 0.75, not figures
+carried over from an earlier, uncommitted run.
+
+---
+
 ## SQLite Storage Verified
 
 ```
