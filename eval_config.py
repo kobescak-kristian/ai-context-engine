@@ -4,8 +4,7 @@ Eval gate thresholds — committed before the first official eval run
 (gate-before-code: the numbers are fixed here first, then run_eval.py
 is pointed at them, so no threshold is chosen after seeing a result).
 
-Locked 2026-07-06 (D1, Option B). See:
-audits/2026-07-06-ai-context-engine-remediation-prompt.md (kristian-os, private)
+Locked 2026-07-06, before the first official eval run.
 
 - FALLBACK_GATE (68/75) is the audit-measured baseline for the
   deterministic fallback path. It is a regression floor, not a target:

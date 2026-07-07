@@ -1,7 +1,7 @@
 # Eval Results
 
 Official run of `run_eval.py` against the committed 75-record `eval_dataset.json`,
-gated by the thresholds in `eval_config.py` (see that file for the D1 rationale).
+gated by the thresholds in `eval_config.py` (see that file for the rationale).
 
 ## Fallback-mode run — 2026-07-07
 
@@ -50,8 +50,8 @@ without reading the retrieved precedent.
 ## Keyed run — 2026-07-07
 
 **Configuration:** real `ANTHROPIC_API_KEY` active, `LLM_MODEL = "claude-sonnet-4-6"`
-(see decision D3 — the originally hardcoded `claude-sonnet-4-20250514` had
-retired and 404'd on every request; this is the first successful keyed run).
+(the originally hardcoded `claude-sonnet-4-20250514` had retired and 404'd on
+every request; this is the first successful keyed run).
 
 ```
 [Eval] Mode: keyed (75 keyed / 0 fallback / 75 total)
@@ -81,8 +81,8 @@ retired and 404'd on every request; this is the first successful keyed run).
 
 **Agreement: 58/75 — FAIL** against the keyed gate (≥ 69/75), and below the
 68/75 fallback baseline it was required to strictly beat. Reported as-is;
-the gate was fixed before this run per D1's gate-before-code rule, and it
-is not adjusted after seeing the result.
+the gate was fixed before this run per the gate-before-code rule in
+`eval_config.py`, and it is not adjusted after seeing the result.
 
 **Every row used the LLM layer as intended** — `context_was_used=1` and
 `used_fallback=0` on all 75 rows, `fallback_reason` empty throughout
@@ -121,10 +121,12 @@ support the first with evidence and cannot support the second.
 - **Single run, no retries or prompt tuning.** This is the first and only
   keyed run recorded. No prompt iteration was attempted to improve the
   score — doing so after seeing this result would be gate-shopping, which
-  D1 explicitly rules out. If the system prompt or model is revised later,
-  that is a new decision with its own entry here, not a silent re-run.
+  the gate-before-code rule above explicitly rules out. If the system
+  prompt or model is revised later, that is a new run with its own entry
+  here, not a silent re-run.
 - **One compare run, one model.** `claude-sonnet-4-6` was used throughout
-  (see decision D3); no comparison against other models was attempted.
+  (the originally hardcoded `claude-sonnet-4-20250514` had retired); no
+  comparison against other models was attempted.
 
 ## Reproduce
 
