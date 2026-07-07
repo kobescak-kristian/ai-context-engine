@@ -314,6 +314,71 @@ producing a higher-quality, evidenced decision vs a blind inference from the des
 
 ---
 
+## Example 7 — Keyed LLM Decision (real API key, `claude-sonnet-4-6`)
+
+Same input as Example 1, re-run with the LLM layer active instead of the deterministic fallback.
+
+### Input
+```json
+{
+  "lead_id": "LEAD-TEST-001",
+  "category": "high_value",
+  "description": "Enterprise SaaS company, 700 employees, CTO requested demo and pricing. Clear buying intent, timeline Q3.",
+  "confidence": 0.84
+}
+```
+
+### Retrieved Context
+```
+[1] case_009 (past_case) similarity=0.4564  outcome=correct
+    "High-value SaaS lead, confidence 0.82, clear buying intent. Qualified immediately,
+     demo booked same day. Closed in 21 days. Fast correct decision."
+
+[2] rule_006 (decision_rule) similarity=0.2021
+    "High-value leads from enterprise accounts (500+ employees) should never be
+     automatically disqualified even at low confidence. Route to manual review minimum."
+
+[3] case_005 (past_case) similarity=0.1816  outcome=incorrect
+    "Enterprise lead (800 employees) auto-disqualified due to low confidence score.
+     Rule violation — enterprise leads must not be auto-disqualified.
+     Lost potential €120k contract. High-cost incorrect decision."
+```
+
+Retrieval scores are identical to Example 1 (retrieval is a deterministic layer that
+doesn't depend on the LLM key) — only the decision layer differs below.
+
+### Decision Output
+```json
+{
+  "recommended_action": "qualify",
+  "reasoning": "This enterprise SaaS lead (700 employees, CTO-initiated, Q3 timeline) closely mirrors case_009, which had nearly identical characteristics (high-value SaaS, 0.82 confidence, clear buying intent) and closed successfully in 21 days. All signals — company size, stakeholder seniority, stated timeline, and buying intent — align with a strong qualify decision.",
+  "supporting_evidence": "case_009 (similarity 0.456) is a near-identical precedent with confidence 0.82 that was correctly qualified immediately and closed in 21 days, directly supporting qualification here at 0.84 confidence. rule_006 mandates that enterprise accounts with 500+ employees receive at minimum a manual review, but given the strength of this lead, qualify is the appropriate escalation beyond that floor. case_005 serves as a cautionary counterexample where an enterprise lead was incorrectly disqualified, resulting in a €120k loss — reinforcing that any hesitation toward disqualification would be a rule violation and high-cost error.",
+  "confidence_adjusted": 0.89,
+  "context_was_used": true
+}
+```
+
+### Explanation Output
+```json
+{
+  "decision": "Qualify lead and route to sales",
+  "why": "This enterprise SaaS lead (700 employees, CTO-initiated, Q3 timeline) closely mirrors case_009, which had nearly identical characteristics (high-value SaaS, 0.82 confidence, clear buying intent) and closed successfully in 21 days. All signals — company size, stakeholder seniority, stated timeline, and buying intent — align with a strong qualify decision.",
+  "based_on": "Retrieved 3 documents via tfidf_fallback: case_009 (past_case, similarity 0.456) [past outcome: correct]; rule_006 (decision_rule, similarity 0.202); case_005 (past_case, similarity 0.182) [past outcome: incorrect].",
+  "risk_flags": [
+    "1 retrieved past case(s) had incorrect outcomes. Similar situations previously resulted in errors — review carefully."
+  ]
+}
+```
+
+`used_fallback: false`, `db_row_id: 79` in the run this was captured from. Compare to Example 1:
+same recommendation (`qualify`), but `confidence_adjusted` rises to 0.89 (vs 0.84 unchanged in
+the fallback version) and the reasoning explicitly cites `case_009`, `rule_006`, and `case_005`
+by ID rather than reciting a fixed threshold rule. See [EVAL_RESULTS.md](EVAL_RESULTS.md) for
+how this decision layer performs across the full 75-record eval set (58/75 — below the fallback's
+68/75; grounding is real but was not, on this run, more accurate than the deterministic rules).
+
+---
+
 ## SQLite Storage Verified
 
 ```
@@ -330,12 +395,15 @@ retrievals table (9 rows — 3 docs × 3 leads):
 
 ## Note on Fallback Mode
 
-All examples above show `used_fallback: true` because the LLM API key is not set
-in this build environment. The deterministic fallback is behaving correctly:
+Examples 1–6 show `used_fallback: true` because they were captured without an
+`ANTHROPIC_API_KEY` set — the default configuration this repo's own Quick Start
+produces. The deterministic fallback is behaving correctly there:
 - support_escalation → always escalate (category rule)
 - high_value + confidence > 0.70 → qualify (threshold rule)
 - ambiguous / uncertain band → manual_review (safe default)
 
-When ANTHROPIC_API_KEY is set, the LLM layer activates and produces context-informed
-reasoning that references specific retrieved documents by ID. The fallback layer then
-becomes the error handler rather than the primary path.
+Example 7 shows the LLM layer active (`ANTHROPIC_API_KEY` set, `claude-sonnet-4-6`):
+`used_fallback: false`, and the reasoning references specific retrieved documents by
+ID rather than reciting a fixed threshold rule. See [EVAL_RESULTS.md](EVAL_RESULTS.md)
+for the full 75-record comparison between the two modes, including where the keyed
+path currently underperforms the deterministic one.
