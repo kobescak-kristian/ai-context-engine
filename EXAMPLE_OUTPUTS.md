@@ -1,5 +1,9 @@
 # AI Context Engine — Example Outputs
 
+All inputs, documents, and figures in this file are synthetic
+demonstration data. Euro amounts are simulated values, not real
+revenue or costs.
+
 ---
 
 ## System Flow (Technical)
@@ -101,6 +105,7 @@ Raw JSON input
      Rule violation — enterprise leads must not be auto-disqualified.
      Lost potential €120k contract. High-cost incorrect decision."
 ```
+(simulated data)
 
 ### Decision Output
 ```json
@@ -244,6 +249,7 @@ Result: { "is_valid": false, "errors": ["Missing required field: description"] }
 [rule_001] decision_rule sim=0.2157                     "Leads with annual revenue above €500k and active buying signal..."
 [case_011] past_case     sim=0.1629  outcome=incorrect  "Low-confidence lead (0.38) with growth signal missed. Disqualified."
 ```
+(simulated data)
 
 ### Query: ambiguous lead manual review uncertain
 ```
@@ -343,6 +349,7 @@ Same input as Example 1, re-run with the LLM layer active instead of the determi
      Rule violation — enterprise leads must not be auto-disqualified.
      Lost potential €120k contract. High-cost incorrect decision."
 ```
+(simulated data)
 
 Retrieval scores are identical to Example 1 (retrieval is a deterministic layer that
 doesn't depend on the LLM key) — only the decision layer differs below.
@@ -428,6 +435,7 @@ hand edits.
   }
 }
 ```
+(simulated data)
 
 ### Difference
 Both legs recommend `qualify` and both are LLM-engaged (`used_fallback: false` on
