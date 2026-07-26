@@ -1,5 +1,7 @@
 # AI Context Engine (RAG Decision Support) — v1.0
 
+[![CI](https://github.com/kobescak-kristian/ai-context-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/kobescak-kristian/ai-context-engine/actions/workflows/ci.yml)
+
 ## Problem
 
 An AI model can output a category and a confidence score. What it
@@ -60,7 +62,10 @@ and the fallback baseline it was required to beat. This is reported
 as measured — the eval gates were fixed before either run happened
 and were not adjusted afterward. See
 [EVAL_RESULTS.md](EVAL_RESULTS.md) for the full output, the miss
-pattern, and why the keyed number reads the way it does.
+pattern, and why the keyed number reads the way it does. The
+malformed-LLM unit suite and the keyless fallback-gate eval (68/75
+against a live server) run in CI on every push — Ubuntu, macOS and
+Windows, Python 3.12 and 3.14.
 
 - Retrieval always runs and every retrieved document is persisted;
   decisions are grounded in that context only when the LLM layer is
