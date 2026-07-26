@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  keyless-eval:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.12', '3.14']
+    runs-on: ${{ matrix.os }}
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install -r requirements.txt pytest
+
+      - name: Malformed-LLM unit suite (no server)
+        shell: bash
+        run: python -m pytest tests/ -v
+
+      # Keyless fallback-gate eval: no ANTHROPIC_API_KEY in CI, so every
+      # decision takes the deterministic fallback path. Expected results are
+      # frozen from the committed evidence (EVAL_RESULTS.md, fallback run).
+      # On Windows Git Bash, $! is the MSYS pid — taskkill needs the Windows
+      # pid, mapped via ps -W (a bare `taskkill //PID $!` finds no process).
+      - name: Fallback-gate eval against live server
+        shell: bash
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          python -m uvicorn app:app --port 8000 > server.log 2>&1 &
+          SERVER_PID=$!
+          cleanup() {
+            case "$(uname -s)" in
+              MINGW*|MSYS*|CYGWIN*)
+                WINPID=$(ps -W -p $SERVER_PID | awk 'NR==2{print $4}')
+                taskkill //F //PID $WINPID || true;;
+              *) kill $SERVER_PID || true;;
+            esac
+          }
+          trap cleanup EXIT
+          # Poll budget: 30 retries x 1s. Measured cold start in a fresh venv
+          # was 3.81s; 30s is ~8x that, explicit and bounded.
+          up=""
+          for i in $(seq 1 30); do
+            if python -c "import httpx;exit(0 if httpx.get('http://localhost:8000/health',timeout=2).status_code==200 else 1)" 2>/dev/null; then up=1; break; fi
+            sleep 1
+          done
+          if [ -z "$up" ]; then echo "server never became healthy"; cat server.log; exit 1; fi
+          python run_eval.py 2>&1 | tee eval.log
+          grep -qF '[Eval] Mode: fallback (0 keyed / 75 fallback / 75 total)' eval.log
+          grep -qF '[Eval] Agreement: 68/75' eval.log
+          grep -qF '[Eval] RESULT: PASS' eval.log
+
+      - name: Dump server log on failure
+        if: failure()
+        shell: bash
+        run: cat server.log || true
