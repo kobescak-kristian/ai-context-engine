@@ -8,7 +8,7 @@
 
 ## Current state
 
-No `## Status` heading exists in this README (same gap as ai-decision-engine). One ADR: `adr/0001-semantic-retrieval-with-tfidf-fallback.md`. Committed eval evidence: `EVAL_RESULTS.md` (fallback-mode 68/75 PASS; keyed run against `claude-sonnet-4-6` after a retired model ID was replaced, D4-reported honestly per its own gate outcome). As of 2026-10-29 that file carries a dated correction section: the keyed FAIL stands as measured, but its original "model-quality result" diagnosis is superseded by a measured scorer imbalance (38/75 labels are `manual_review`) and a prompt specification gap (four of five actions undefined), and the prompt gap is fixed.
+No `## Status` heading exists in this README (same gap as ai-decision-engine). One ADR: `adr/0001-semantic-retrieval-with-tfidf-fallback.md`. Committed eval evidence: `EVAL_RESULTS.md` (fallback-mode 68/75 PASS; keyed run against `claude-sonnet-4-6` after a retired model ID was replaced, D4-reported honestly per its own gate outcome). As of 2026-10-29 that file carries a dated correction section: the keyed FAIL stands as measured, but its original "model-quality result" diagnosis is superseded by a measured scorer imbalance (38/75 labels are `manual_review`) and a prompt specification gap (four of five actions undefined), and the prompt gap is fixed. A second 2026-10-29 commit fixes retrieval index initialisation: the index is now built at server startup and the module-level retriever is published only after a successful build, so an interrupted cold-start build can no longer leave the server returning "Index not built" until restart.
 
 ## Build history (from `git log --reverse`, oldest → newest)
 
@@ -26,7 +26,7 @@ No `## Status` heading exists in this README (same gap as ai-decision-engine). O
 - **2026-08-03 – 2026-08-04** (`8c72379`, `539cfb3`, `c35ff23`, `af30be7`) — Publish-gate canary; allowlist entry-exact migration; Apache-2.0 license; Q-35 hook rollout.
 - **2026-09-15** (`cee7558`) — Canonical AGENTS.md router adopted (Q-93).
 - **2026-09-19** — Q-72(f): STATE.md added (this file); validator gains a STATE.md-existence check, the obsolete 5-record decision cap is removed, and the six-name BANNED_WITHOUT_TRIGGER list is propagated (live-file precondition checked, clear).
-- **2026-10-29** (this commit) — Keyed-run diagnosis corrected; prompt
+- **2026-10-29** (`1944304`) — Keyed-run diagnosis corrected; prompt
   specification gap closed. `EVAL_RESULTS.md`'s conclusion that the 58/75 keyed
   FAIL was "a genuine model-quality result" is superseded by two causes derived
   from the committed artifacts: the answer key is 51% one class (38 of 75
@@ -43,6 +43,35 @@ No `## Status` heading exists in this README (same gap as ai-decision-engine). O
   .githooks/validate_artifacts.py .` Tier 0 PASS (exit 0); `python run_eval.py`
   against a live local server `68/75 RESULT: PASS` (exit 0), the same 7 misses
   as the committed fallback run.
+- **2026-10-29** (this commit) — Retrieval index initialisation fixed; the
+  latent singleton defect observed during the previous item's verification is
+  closed. `engine.get_retriever()` published an unbuilt `FAISSRetriever` into
+  the module-level singleton before `build()` returned, so a request cancelled
+  or failing during the cold-start index build left the instance cached and
+  every later call raised `Index not built. Call build() first.` until the
+  process restarted. The documented path reached it: `README.md` offers
+  `sentence-transformers` as an optional upgrade, the semantic cold-start index
+  build measured 39s and 40s to server-ready across two runs and 81.9s for a
+  direct build in a fresh process, and `run_eval.py` uses a 30s per-request
+  timeout, so installing the optional model and running the documented eval
+  bricked the server on its first request. CI never reached it because `requirements.txt`
+  leaves `sentence-transformers` commented out and the TF-IDF build measured
+  0.005s. Fix: `build_retriever()` extracted and the singleton published only
+  after the build succeeds, under a `threading.Lock` so concurrent first
+  callers build once; `app.py` gains a `lifespan` hook that builds the index
+  before the server accepts traffic, logging one flushed `[Startup] FATAL:` line
+  and re-raising on failure, so the service never comes up without a working
+  index. No gate change, no dataset change, no new eval cycle, no keyed run, no
+  change to retrieval or decision behaviour. Verified keyless: `python -m pytest
+  tests/` 21 passed (exit 0), including 4 new tests in
+  `tests/test_retriever_init.py`, whose core regression test was confirmed to
+  FAIL against the pre-fix `get_retriever()` and pass after it; `python
+  .githooks/validate_artifacts.py .` Tier 0 PASS (exit 0); `python run_eval.py`
+  against a live local server `68/75 RESULT: PASS` (exit 0), the same 7 misses
+  as the committed fallback run, with CI's three grep assertions reproduced and
+  zero `Index not built` or HTTP 500 entries in the server log; startup-failure
+  path exercised by removing `knowledge_base.json`, uvicorn exited 3 with the
+  `[Startup] FATAL:` line preceding the traceback.
 
 ## Open loops
 
@@ -59,8 +88,11 @@ Opened 2026-10-29, none authorized for work here:
   contradictory retrieved context to `manual_review` was deliberately left in
   place, because removing it changes how the keyed path decides live cases and
   nothing has measured that.
-- **Latent retrieval-singleton defect, not fixed.** `engine.get_retriever()`
-  assigns the module-level singleton before `build()` completes, so a request
-  cancelled during the cold-start index build leaves the server returning
-  "Index not built. Call build() first." until it is restarted. Observed
-  2026-10-29 during local verification; out of scope for that item.
+
+## Closed loops
+
+- **Latent retrieval-singleton defect** — opened 2026-10-29, closed 2026-10-29
+  (this commit). `engine.get_retriever()` cached an unbuilt retriever, so a
+  request cancelled during the cold-start index build left the server returning
+  "Index not built. Call build() first." until restart. Fixed in `engine.py`
+  and `app.py` with regression cover; see the build-history entry for evidence.

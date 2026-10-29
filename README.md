@@ -109,6 +109,12 @@ higher-quality retrieval. Without it the system falls back to TF-IDF automatical
 pip install sentence-transformers
 ```
 
+The server builds its embedding index at startup and does not accept requests
+until it is ready. With the model installed this measured about 40 seconds to
+server-ready; the TF-IDF fallback index build measured 0.005 seconds. Wait for
+`Application startup complete` in the server log before sending a case or
+running `run_eval.py`.
+
 ## Quick Start
 
 **Shell:** the commands below use bash syntax (Git Bash, WSL, or macOS/Linux

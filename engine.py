@@ -14,6 +14,7 @@ from __future__ import annotations
 import json
 import math
 import re
+import threading
 from pathlib import Path
 from typing import Optional
 
@@ -184,16 +185,32 @@ class FAISSRetriever:
 
 # ─── Module-level singleton ───────────────────────────────────────────────────
 
+# The retriever is published only after build() returns. Publishing an unbuilt
+# instance first would leave it cached when a build is interrupted or fails, and
+# every later call would pass the None check and then raise "Index not built"
+# until the process restarted. The lock stops two concurrent first callers from
+# building the index, and loading the embedding model, twice.
+
 _retriever: Optional[FAISSRetriever] = None
+_retriever_lock = threading.Lock()
+
+
+def build_retriever() -> FAISSRetriever:
+    """Construct and build a retriever from the knowledge base on disk."""
+    retriever = FAISSRetriever()
+    with open(KNOWLEDGE_BASE_PATH) as f:
+        documents = json.load(f)
+    retriever.build(documents)
+    return retriever
 
 
 def get_retriever() -> FAISSRetriever:
     global _retriever
-    if _retriever is None:
-        _retriever = FAISSRetriever()
-        with open(KNOWLEDGE_BASE_PATH) as f:
-            documents = json.load(f)
-        _retriever.build(documents)
+    if _retriever is not None:
+        return _retriever
+    with _retriever_lock:
+        if _retriever is None:
+            _retriever = build_retriever()
     return _retriever
 
 

@@ -15,12 +15,41 @@ from __future__ import annotations
 from dotenv import load_dotenv
 load_dotenv()
 
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 
+from engine import get_retriever
 from pipeline import run_pipeline, run_comparison
 from db import get_explanations, get_context_for_lead
+
+
+# ─── Startup ──────────────────────────────────────────────────────────────────
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    """
+    Build the retrieval index before the server accepts traffic.
+
+    Building it on the first request instead makes that request wait for the
+    whole index build, which measured about 40 seconds to server-ready with the
+    optional sentence-transformers model installed. A build failure here stops
+    startup by design: the service never comes up without a working index.
+    FAISSRetriever.build() logs the document count and retrieval mode on success.
+    """
+    try:
+        get_retriever()
+    except Exception as exc:
+        # flush=True: stdout is block-buffered when redirected to a log file,
+        # so without it this line surfaces only at process exit, below the
+        # traceback it is meant to introduce.
+        print(f"[Startup] FATAL: retrieval index could not be built: {exc}", flush=True)
+        raise
+    yield
+
 
 app = FastAPI(
     title="AI Context Engine",
@@ -29,6 +58,7 @@ app = FastAPI(
         "deterministic fallback, validation, and SQLite audit trail."
     ),
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 
