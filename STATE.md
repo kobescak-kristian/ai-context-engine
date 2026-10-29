@@ -43,7 +43,7 @@ No `## Status` heading exists in this README (same gap as ai-decision-engine). O
   .githooks/validate_artifacts.py .` Tier 0 PASS (exit 0); `python run_eval.py`
   against a live local server `68/75 RESULT: PASS` (exit 0), the same 7 misses
   as the committed fallback run.
-- **2026-10-29** (this commit) — Retrieval index initialisation fixed; the
+- **2026-10-29** (`d0caa53`) — Retrieval index initialisation fixed; the
   latent singleton defect observed during the previous item's verification is
   closed. `engine.get_retriever()` published an unbuilt `FAISSRetriever` into
   the module-level singleton before `build()` returned, so a request cancelled
@@ -92,7 +92,7 @@ Opened 2026-10-29, none authorized for work here:
 ## Closed loops
 
 - **Latent retrieval-singleton defect** — opened 2026-10-29, closed 2026-10-29
-  (this commit). `engine.get_retriever()` cached an unbuilt retriever, so a
+  (`d0caa53`). `engine.get_retriever()` cached an unbuilt retriever, so a
   request cancelled during the cold-start index build left the server returning
   "Index not built. Call build() first." until restart. Fixed in `engine.py`
   and `app.py` with regression cover; see the build-history entry for evidence.
