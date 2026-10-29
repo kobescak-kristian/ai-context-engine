@@ -62,7 +62,10 @@ and the fallback baseline it was required to beat. This is reported
 as measured — the eval gates were fixed before either run happened
 and were not adjusted afterward. See
 [EVAL_RESULTS.md](EVAL_RESULTS.md) for the full output, the miss
-pattern, and why the keyed number reads the way it does. The
+pattern, and the
+[2026-10-29 correction](EVAL_RESULTS.md#correction-2026-10-29-why-the-keyed-run-failed)
+that traces 12 of the 17 keyed misses to a prompt that never
+defined four of the five permitted actions, since fixed. The
 malformed-LLM unit suite and the keyless fallback-gate eval (68/75
 against a live server) run in CI on every push — Ubuntu, macOS and
 Windows, Python 3.12 and 3.14.
@@ -246,7 +249,8 @@ response says `context_was_used: false`, that is not a bug: the "grounded in ret
 context" outcome claim describes the LLM-active path, which requires a configured
 `ANTHROPIC_API_KEY`. That path has now been recorded end-to-end (see
 [EVAL_RESULTS.md](EVAL_RESULTS.md)) — grounding is real, but is a separate claim from
-accuracy; see "The eval set structurally favors the rule-based fallback" below.
+accuracy; see "The eval set structurally favors the rule-based fallback" below
+for the measured size of that effect.
 
 **Retrieval quality is bounded by the knowledge base** — no embedding
 fine-tuning; quality scales with the size and quality of the stored
@@ -255,16 +259,29 @@ cases.
 **Synthetic data** — the knowledge base and evaluation set are
 generated, not real client data.
 
-**The eval set structurally favors the rule-based fallback.** `eval_dataset.json`'s
-`expected_action` labels were generated from the same kind of threshold logic the
-deterministic fallback implements (confidence bands, category rules), because there
-is no real client data to grade against. That is one reason the keyed (LLM) run
-scored lower than the fallback run on this set (58/75 vs 68/75, see
-[EVAL_RESULTS.md](EVAL_RESULTS.md)): the fallback is being measured against labels
-shaped like its own logic, while the LLM is being measured against the same labels
-without that structural advantage. This is a property of the eval set, not a defect
-found and hidden — the honest reading is that this 75-record synthetic eval is a
-weaker signal on the keyed path than it would be against real outcome data.
+**The eval set structurally favors the rule-based fallback, and the numbers say
+by how much.** 38 of the 75 `expected_action` labels in `eval_dataset.json` are
+`manual_review` — 51% of the answer key in one class. A constant classifier that
+always answers `manual_review` scores 38/75 without reasoning about anything.
+`manual_review` is also the deterministic fallback's own catch-all branch, so the
+fallback collects 35 of those 38 rows by default; its 68/75 is 16/16 `qualify`,
+10/10 `escalate`, 7/7 `disqualify`, 35/38 `manual_review` and 0/4 `hold`.
+
+**The keyed gate therefore measures agreement with the rule engine, not decision
+quality.** At 69/75 it asks the LLM path to miss at most 6 rows where the rule
+path misses 7: to reproduce the rule path and then also win one of the 7 rows
+the rules get wrong, which means a `hold` row (a class the four rules cannot
+emit, and which the dataset never separates from `manual_review` by any stated
+criterion) or one of the 3 `manual_review` rows the rules miss. Two things
+explain the keyed run's 58/75 against the fallback's 68/75: this skewed answer
+key, and a prompt that defined four of the five permitted actions nowhere
+(since fixed). The gate is why that score was recorded as a FAIL, not why the
+score was what it was (see
+[EVAL_RESULTS.md](EVAL_RESULTS.md#correction-2026-10-29-why-the-keyed-run-failed)
+for the full derivation). This is a property of the eval set and its gate, not a
+defect found and hidden — the honest reading is that this 75-record synthetic eval
+is a weak instrument on the keyed path, and that a future keyed cycle needs a
+scorer that measures what this system actually claims.
 
 **No API authentication** — endpoints are open; production requires
 auth middleware.

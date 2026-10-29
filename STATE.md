@@ -8,7 +8,7 @@
 
 ## Current state
 
-No `## Status` heading exists in this README (same gap as ai-decision-engine). One ADR: `adr/0001-semantic-retrieval-with-tfidf-fallback.md`. Committed eval evidence: `EVAL_RESULTS.md` (fallback-mode 68/75 PASS; keyed run against `claude-sonnet-4-6` after a retired model ID was replaced, D4-reported honestly per its own gate outcome).
+No `## Status` heading exists in this README (same gap as ai-decision-engine). One ADR: `adr/0001-semantic-retrieval-with-tfidf-fallback.md`. Committed eval evidence: `EVAL_RESULTS.md` (fallback-mode 68/75 PASS; keyed run against `claude-sonnet-4-6` after a retired model ID was replaced, D4-reported honestly per its own gate outcome). As of 2026-10-29 that file carries a dated correction section: the keyed FAIL stands as measured, but its original "model-quality result" diagnosis is superseded by a measured scorer imbalance (38/75 labels are `manual_review`) and a prompt specification gap (four of five actions undefined), and the prompt gap is fixed.
 
 ## Build history (from `git log --reverse`, oldest → newest)
 
@@ -25,8 +25,42 @@ No `## Status` heading exists in this README (same gap as ai-decision-engine). O
 - **2026-07-27** (`3132c2b`, `6e49fa0`) — Keyless 3-OS eval CI, malformed-LLM suite, allowlist added; CI badge + coverage note.
 - **2026-08-03 – 2026-08-04** (`8c72379`, `539cfb3`, `c35ff23`, `af30be7`) — Publish-gate canary; allowlist entry-exact migration; Apache-2.0 license; Q-35 hook rollout.
 - **2026-09-15** (`cee7558`) — Canonical AGENTS.md router adopted (Q-93).
-- **2026-09-19** (this commit) — Q-72(f): STATE.md added (this file); validator gains a STATE.md-existence check, the obsolete 5-record decision cap is removed, and the six-name BANNED_WITHOUT_TRIGGER list is propagated (live-file precondition checked, clear).
+- **2026-09-19** — Q-72(f): STATE.md added (this file); validator gains a STATE.md-existence check, the obsolete 5-record decision cap is removed, and the six-name BANNED_WITHOUT_TRIGGER list is propagated (live-file precondition checked, clear).
+- **2026-10-29** (this commit) — Keyed-run diagnosis corrected; prompt
+  specification gap closed. `EVAL_RESULTS.md`'s conclusion that the 58/75 keyed
+  FAIL was "a genuine model-quality result" is superseded by two causes derived
+  from the committed artifacts: the answer key is 51% one class (38 of 75
+  `expected_action` labels are `manual_review`, so a constant classifier scores
+  38/75), and the deterministic fallback's 68/75 decomposes to 16/16 `qualify`,
+  10/10 `escalate`, 7/7 `disqualify`, 35/38 `manual_review`, 0/4 `hold` —
+  taking the majority class by default. `SYSTEM_PROMPT` defined four of the five
+  permitted actions nowhere, which accounts for 12 of the 17 keyed misses (6
+  `qualify`→`manual_review`, 2 `qualify`→`escalate`, 4 `hold`→`manual_review`).
+  `support.py` now defines all five actions and gives `hold` an operational
+  criterion. No gate change (`KEYED_GATE_MIN_AGREEMENT` stays 69), no dataset
+  change, no new eval cycle, no keyed run, nothing deleted. Verified keyless:
+  `python -m pytest tests/` 17 passed (exit 0); `python
+  .githooks/validate_artifacts.py .` Tier 0 PASS (exit 0); `python run_eval.py`
+  against a live local server `68/75 RESULT: PASS` (exit 0), the same 7 misses
+  as the committed fallback run.
 
 ## Open loops
 
-None on disk. README's sparse Version Log vs. this repo's real build history is flagged above, not corrected here — a README-content decision, out of this item's scope.
+README's sparse Version Log vs. this repo's real build history is flagged above, not corrected here — a README-content decision, out of this item's scope.
+
+Opened 2026-10-29, none authorized for work here:
+
+- **The keyed gate measures the wrong thing.** `KEYED_GATE_MIN_AGREEMENT = 69`
+  requires the LLM path to reproduce the rule path and also win at least one row
+  the rules get wrong. A keyed cycle that measures decision quality needs a new
+  scorer with its gate frozen before it runs, and records held out from the
+  current 75. Not opened here; owner decision.
+- **One prompt coupling left unmeasured.** The rule tying ambiguous or
+  contradictory retrieved context to `manual_review` was deliberately left in
+  place, because removing it changes how the keyed path decides live cases and
+  nothing has measured that.
+- **Latent retrieval-singleton defect, not fixed.** `engine.get_retriever()`
+  assigns the module-level singleton before `build()` completes, so a request
+  cancelled during the cold-start index build leaves the server returning
+  "Index not built. Call build() first." until it is restarted. Observed
+  2026-10-29 during local verification; out of scope for that item.
