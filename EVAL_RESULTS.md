@@ -87,8 +87,15 @@ the gate was fixed before this run per the gate-before-code rule in
 **Every row used the LLM layer as intended** — `context_was_used=1` and
 `used_fallback=0` on all 75 rows, `fallback_reason` empty throughout
 (verified: `SELECT COUNT(*) FROM decisions WHERE context_was_used=1 AND
-used_fallback=0` = 76 across this run plus one smoke-test row). The FAIL is
-a genuine model-quality result, not a fallback contaminating the sample.
+used_fallback=0` = 76 across this run plus one smoke-test row). No fallback
+contaminated the sample.
+
+> **Superseded reading.** This section originally concluded that the FAIL was
+> "a genuine model-quality result". That conclusion does not hold. See
+> [Correction (2026-10-29)](#correction-2026-10-29-why-the-keyed-run-failed)
+> below: the better supported causes are a prompt specification gap and a
+> scorer whose answer key is 51% one class. The run output, the gate and
+> the FAIL are unchanged.
 
 **Miss pattern.** The 17 misses cluster into two failure modes, not random
 noise:
@@ -123,12 +130,119 @@ support the first with evidence and cannot support the second.
   score — doing so after seeing this result would be gate-shopping, which
   the gate-before-code rule above explicitly rules out. If the system
   prompt or model is revised later, that is a new run with its own entry
-  here, not a silent re-run.
+  here, not a silent re-run. **Update 2026-10-29:** the system prompt has
+  since been revised, for the specification reasons set out in the correction
+  below, not to improve this score. No new keyed run has been made, so no new
+  entry exists here yet.
 - **One compare run, one model.** `claude-sonnet-4-6` was used throughout
   (the originally hardcoded `claude-sonnet-4-20250514` had retired); no
   comparison against other models was attempted.
 
 The keyed with/without-context compare run referenced in the README Outcome section is committed verbatim as Example 8 in [EXAMPLE_OUTPUTS.md](EXAMPLE_OUTPUTS.md).
+
+## Correction (2026-10-29): why the keyed run failed
+
+This section was added after the fact. It corrects the *diagnosis* above. It
+does not change the keyed run's output, the gate, or the FAIL, all of which
+stand exactly as first recorded.
+
+**What the original write-up got wrong.** It attributed the 58/75 to model
+quality. Two causes are better supported, and both were visible in the
+committed artifacts before any run happened.
+
+### Cause 1: the scorer's answer key is 51% one class
+
+Label distribution of the committed 75-record `eval_dataset.json`
+(derived from the file, not from any run):
+
+| `expected_action` | records |
+|---|---|
+| `manual_review` | 38 |
+| `qualify` | 16 |
+| `escalate` | 10 |
+| `disqualify` | 7 |
+| `hold` | 4 |
+
+A constant classifier that always answers `manual_review` and reasons about
+nothing scores **38/75** on this set. That is the floor the metric starts from.
+
+The fallback's 68/75 decomposes against the 7 misses recorded above:
+
+| `expected_action` | fallback correct |
+|---|---|
+| `qualify` | 16 / 16 |
+| `escalate` | 10 / 10 |
+| `disqualify` | 7 / 7 |
+| `manual_review` | 35 / 38 |
+| `hold` | 0 / 4 |
+| **total** | **68 / 75** |
+
+The four deterministic rules are perfect on three classes and take 35 of the
+38 `manual_review` rows by *default*, because `manual_review` is both the
+fallback's own catch-all branch and the key's majority class. The fallback's
+only structural blind spot is `hold`, which it cannot emit at all.
+
+The consequence for `KEYED_GATE_MIN_AGREEMENT = 69`: to clear it, the LLM
+path must miss at most 6 of 75 while the rule path misses 7. It must
+therefore reproduce the rule path almost exactly and also win at least one
+row the rules get wrong: a `hold` row, or one of the three `manual_review`
+rows the rules miss. Copying the fallback's confidence thresholds into the
+system prompt is not enough on its own, because that scores what the rules
+score, 68. The gate as written rewards agreement with the rule engine and
+does not measure decision quality.
+
+A second scorer problem: the 4 `hold` labels have no stated criterion
+anywhere in `eval_dataset.json` or `dataset_generator.py` separating `hold`
+from `manual_review`. Both mean "do not act yet". Those 4 rows are not
+reliably earnable by any implementation.
+
+### Cause 2: a prompt specification gap (now fixed)
+
+The `SYSTEM_PROMPT` in `support.py`, as it stood for the keyed run, listed
+the five permitted actions inside the output schema and defined four of the
+five nowhere. The only action it gave the model any instruction for was
+`manual_review`, which it tied to ambiguous or contradictory retrieved
+context. `qualify`, `disqualify`, `escalate` and `hold` carried no criterion
+at all.
+
+This maps onto the two miss clusters recorded above:
+
+- of the 8 under-committing misses, the 6 `qualify` to `manual_review` rows
+  follow the instruction the prompt actually gave. The 2 `qualify` to
+  `escalate` rows are not covered by that instruction; they follow from
+  `qualify` and `escalate` never having been defined;
+- the 4 `hold` to `manual_review` misses follow from `hold` never having been
+  specified, so the model could not know when it applied.
+
+That is 12 of the 17 misses traceable to the prompt rather than to the model.
+The model was graded against a rubric it was never given.
+
+**Fixed on 2026-10-29:** the prompt now defines all five actions and gives
+`hold` an operational criterion (an external fact must change or become
+knowable before any decision is possible).
+
+The prompt's existing rule that ambiguous or contradictory retrieved context
+should produce `manual_review` was deliberately left in place. Removing it
+would change how the keyed path decides live cases, and nothing has measured
+that, so it stays until a cycle with its own frozen scorer can test it. The
+specification gap is closed; this one coupling of retrieval ambiguity to a
+single action is recorded here as open.
+
+### What this correction does not do
+
+- **No gate was changed.** `eval_config.py` is untouched;
+  `KEYED_GATE_MIN_AGREEMENT` is still 69.
+- **No result was changed or removed.** The 58/75 keyed FAIL above stands as
+  measured.
+- **No new eval cycle was run.** The prompt fix is justified on specification
+  grounds only. No claim is made here that it raises the score, and no keyed
+  run has been executed since it landed. A future cycle needs its own scorer
+  and gate frozen before it runs.
+- **Disclosed fitting risk:** the `hold` criterion above was written while
+  reading this dataset's four `hold` labels. It is stated generically and
+  references no eval case, but it was informed by the answer key, so a future
+  run against this same 75-record set would carry a fitting risk. A new cycle
+  should score against records held out from this set.
 
 ## Reproduce
 
