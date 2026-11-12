@@ -14,6 +14,8 @@ structured explanation with risk flags, and normally persists the input,
 retrieval, decision and explanation to a SQLite audit trail. It is
 decision support with an audit trail, not a chatbot or a Q&A system.
 
+Classification: PROJECT.
+
 ## Authority and conflict handling
 
 Where truth lives:
