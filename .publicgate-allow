@@ -1,7 +1,3 @@
-CLAUDE.md | - Governance home: kristian-os (PRINCIPLES -> GOVERNANCE -> | owner ruling 2026-08-04 (entry-exact migration, canary-resolve-a)
-CLAUDE.md |   FAILURE_REGISTER). Read before any irreversible action. | owner ruling 2026-08-04 (entry-exact migration, canary-resolve-a)
-CLAUDE.md | - Work comes from the governance repo's queue (kristian-os, | owner ruling 2026-08-04 (entry-exact migration, canary-resolve-a)
-CLAUDE.md |   FABLE_QUEUE); do not invent tasks. | owner ruling 2026-08-04 (entry-exact migration, canary-resolve-a)
 # adjudicated-secrets
 support.py |     api_key = os.environ.get(LLM_API_KEY_ENV) | support.py:87 |     api_key = os.environ.get(LLM_API_KEY_ENV) | owner ruling 2026-08-04
 support.py |     if not api_key: | support.py:87 |     api_key = os.environ.get(LLM_API_KEY_ENV) | owner ruling 2026-08-04
