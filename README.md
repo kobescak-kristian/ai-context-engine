@@ -1,6 +1,10 @@
 # AI Context Engine (RAG Decision Support) — v1.0
 
+RAG decision support that shows what each AI decision was based on and keeps an auditable case history.
+
 [![CI](https://github.com/kobescak-kristian/ai-context-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/kobescak-kristian/ai-context-engine/actions/workflows/ci.yml)
+
+**Status:** Built, 2026-06-20. v1.0.
 
 ## Problem
 
@@ -85,7 +89,31 @@ Windows, Python 3.12 and 3.14.
 - Full chain — input, retrieved documents, decision, explanation —
   persisted to SQLite for cross-run audit
 
-## Installation
+## System
+
+![AI Context Engine Overview](ai-context-engine_architecture.png)
+
+## System Flow
+
+1. **Input** — structured case received and validated
+   (`lead_id`, `category`, `description`, `confidence`)
+2. **Retrieval (RAG)** — FAISS search over the knowledge base returns
+   the most relevant past cases and rules; uses sentence-transformers
+   embeddings when available, falls back to TF-IDF automatically, so
+   the system runs anywhere without requiring the embedding model
+3. **Decision support** — the model receives the input plus retrieved
+   context and returns strict JSON: `recommended_action`, `reasoning`,
+   `supporting_evidence`, `confidence_adjusted`
+4. **Validation** — Pydantic checks category validity, confidence
+   range, and that reasoning is present; a deterministic fallback
+   handles any failure
+5. **Explanation** — a structured explanation is produced: `decision`,
+   `why`, `based_on`, `risk_flags`
+6. **Storage** — input, retrieved documents, decision, and explanation
+   are written to SQLite (with a normalised retrievals table) for a
+   complete audit trail
+
+## Run it
 
 ```bash
 git clone https://github.com/kobescak-kristian/ai-context-engine
@@ -148,30 +176,6 @@ curl http://localhost:8000/explanations
 # Interactive API docs — open in your browser:
 # http://localhost:8000/docs
 ```
-
-## Architecture
-
-![AI Context Engine Overview](ai-context-engine_architecture.png)
-
-## System Flow
-
-1. **Input** — structured case received and validated
-   (`lead_id`, `category`, `description`, `confidence`)
-2. **Retrieval (RAG)** — FAISS search over the knowledge base returns
-   the most relevant past cases and rules; uses sentence-transformers
-   embeddings when available, falls back to TF-IDF automatically, so
-   the system runs anywhere without requiring the embedding model
-3. **Decision support** — the model receives the input plus retrieved
-   context and returns strict JSON: `recommended_action`, `reasoning`,
-   `supporting_evidence`, `confidence_adjusted`
-4. **Validation** — Pydantic checks category validity, confidence
-   range, and that reasoning is present; a deterministic fallback
-   handles any failure
-5. **Explanation** — a structured explanation is produced: `decision`,
-   `why`, `based_on`, `risk_flags`
-6. **Storage** — input, retrieved documents, decision, and explanation
-   are written to SQLite (with a normalised retrievals table) for a
-   complete audit trail
 
 ## Business Value
 
@@ -308,8 +312,8 @@ cases · API authentication · PostgreSQL.*
 
 ```
 ai-context-engine/
-├── adr/                     # Architecture decision records (Tier 0)
-├── .githooks/               # Pre-push validation (ARTIFACT_STANDARD check)
+├── adr/                     # Architecture decision records
+├── .githooks/               # Pre-push documentation check
 ├── app.py                   # FastAPI app and endpoint definitions
 ├── pipeline.py              # Orchestrator — runs all layers in sequence
 ├── engine.py                # RAG retrieval layer (FAISS + TF-IDF fallback)
@@ -325,8 +329,8 @@ ai-context-engine/
 ├── eval_config.py           # Eval gate thresholds (committed before the first run)
 ├── EVAL_RESULTS.md          # Committed eval run output
 ├── EXAMPLE_OUTPUTS.md       # Sample pipeline outputs
-├── ai-context-engine_architecture.png  # Architecture diagram (see Architecture section)
-├── CLAUDE.md                # ARTIFACT_STANDARD project instructions
+├── ai-context-engine_architecture.png  # Architecture diagram (see System section)
+├── CLAUDE.md                # Project instructions for coding agents
 ├── README.md                # This file
 ├── .env.example             # Environment variable template
 └── requirements.txt
@@ -349,3 +353,7 @@ Part of a five-engine AI decision system:
 - **AI Context Engine** - grounds decisions in retrieved precedent and explains them *(this system)*
 
 Complete system: validation → evaluation → financial impact → grounded explanation → execution
+
+## License
+
+Apache License 2.0. See [LICENSE](LICENSE).
