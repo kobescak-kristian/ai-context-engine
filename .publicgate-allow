@@ -1,3 +1,4 @@
+# The entries below are code lines that read an API key from an environment variable. No key is stored in this repository.
 # adjudicated-secrets
 support.py |     api_key = os.environ.get(LLM_API_KEY_ENV) | support.py:87 |     api_key = os.environ.get(LLM_API_KEY_ENV) | owner ruling 2026-08-04
 support.py |     if not api_key: | support.py:87 |     api_key = os.environ.get(LLM_API_KEY_ENV) | owner ruling 2026-08-04
